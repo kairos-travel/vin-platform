@@ -1,34 +1,80 @@
 # Урок 05 — Docker Compose
 
-**Цель:** `docker compose up` поднимает app + db + **queue worker**; VIN-путь работает в контейнере.
+**Цель:** `docker compose up` — app + db + **queue worker**; VIN-путь в контейнере.
 
-## Задание (сдать наставнику)
+**Перед стартом:** урок **03** с очередью · [урок 00](00-local-environment.md) (VPS) · корневой [05-docker-compose.md](../../../homework/05-docker-compose.md)
 
-- [ ] **Шаг 1:** `docker-compose.yml` в `projects/vin-platform/`: php-fpm (или app), nginx, mysql/postgres, redis (опционально).
-- [ ] **Шаг 2:** сервис `queue` с `php artisan queue:work`.
-- [ ] **Шаг 3:** README-фрагмент: как запустить migrate + worker.
-- [ ] **Шаг 4:** после тестового webhook в контейнере отчёт появляется без ручного `queue:work` на хосте.
-- [ ] **Собес:** D1–D4 из корневого [05](../../../homework/05-docker-compose.md) — устно.
-- [ ] `TIME_LOG`.
+---
 
-## Перед ДЗ
+## Шаг 1 — docker-compose.yml
 
-- Корневой [05-docker-compose.md](../../../homework/05-docker-compose.md) — эталон по шагам
-- Урок **03** с очередью
-- **VPS:** поднят на [уроке 00](00-local-environment.md) — nginx, PHP, MySQL; compose можно гонять **локально** или на том же VPS
+- [ ] Сервисы: app/php-fpm, nginx, mysql, опционально redis
 
-## Техника
+**Прочитать:**
 
-Минимальный compose:
+| Тема | Документация |
+|------|----------------|
+| Docker Compose | [Compose file reference](https://docs.docker.com/compose/compose-file/) |
+| Эталон урока | [05-docker-compose.md](../../../homework/05-docker-compose.md) |
 
-- `app` — PHP 8.3+, volume на код
-- `nginx` — прокси на `public/`
-- `db` — MySQL 8
-- `queue` — тот же image, command: `queue:work --sleep=1`
+**Сделать:**
 
-`.env.docker` или переменные в compose для `DB_HOST=db`, `QUEUE_CONNECTION=database` или `redis`.
+- `docker-compose.yml` в `projects/vin-platform/`
+- Volume на код; PHP 8.3+
 
-**Критерий:** наставник повторяет запуск по вашему README.
+---
+
+## Шаг 2 — Сервис queue
+
+- [ ] `php artisan queue:work` в отдельном контейнере
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Laravel queues | [Queues](https://laravel.com/docs/queues) |
+| Running worker | [Running Queue Worker](https://laravel.com/docs/queues#running-the-queue-worker) |
+
+**Сделать:**
+
+- Сервис `queue`: тот же image, `command: queue:work --sleep=1`
+- `DB_HOST=db`, `QUEUE_CONNECTION=database` или `redis`
+
+---
+
+## Шаг 3 — README-фрагмент
+
+- [ ] Инструкция: migrate + worker в Docker
+
+**Прочитать:**
+
+- Корневой урок 05 — INF1–INF5
+
+**Сделать:**
+
+- Команды `docker compose up`, `migrate`, проверка webhook
+
+---
+
+## Шаг 4 — Демо end-to-end
+
+- [ ] Webhook в контейнере → отчёт без ручного `queue:work` на хосте
+
+**Сделать:**
+
+- Тестовый платёж → PDF `completed` только через compose
+
+**Критерий:** наставник повторяет запуск по README.
+
+---
+
+## Собес
+
+- [ ] D1–D4 из корневого [05](../../../homework/05-docker-compose.md) — устно
+
+## TIME_LOG
+
+- [ ] Записать часы
 
 ## Следующий урок
 
@@ -38,4 +84,4 @@
 
 ## Справочник
 
-> [05 Docker](../../../homework/05-docker-compose.md) — INF1–INF5.
+> [05 Docker](../../../homework/05-docker-compose.md)

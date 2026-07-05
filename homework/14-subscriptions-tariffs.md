@@ -1,64 +1,121 @@
-# Урок 14 — Тарифы: по дням и по количеству
+# Урок 14 — Тарифы: пакеты по количеству
 
-**Цель:** блок ТЗ «Тарифы» — **два типа** продуктов на `/tariffs`:
+**Цель:** `/tariffs` — покупка пакетов N отчётов; списание квоты при checkout.
 
-1. **По дням** — доступ на 7 / 30+ дней (безлимит или скидка на услуги в период).
-2. **По количеству** — пакет из N отчётов (списание 1 за заказ).
+**Перед стартом:** ответ заказчика [QUESTIONS_FOR_CLIENT §0](../QUESTIONS_FOR_CLIENT.md) · [QUESTIONS.md](../QUESTIONS.md) · [GLOSSARY.md](../GLOSSARY.md) · [DOMAIN.md § тарифы](../DOMAIN.md)
 
-Разовые покупки через Offer + корзину **остаются**; тариф меняет цену или списывает квоту.
+---
 
-**Термины:** [GLOSSARY.md](../GLOSSARY.md). Решение п.8: [DOMAIN.md](../DOMAIN.md#как-работают-тарифы-п8).
+## Шаг 0 — ERD фаза B
 
-## Задание (сдать наставнику)
+- [ ] OK наставника на схему тарифов **до миграций**
 
-- [ ] **Шаг 0:** ответ заказчика по [QUESTIONS_FOR_CLIENT §0](../QUESTIONS_FOR_CLIENT.md) получен; **ERD фаза B** — дополнить [docs/ERD.md](../docs/ERD.md) таблицами тарифов; OK наставника.
-- [ ] **Шаг 1:** миграции `tariff_plans`, `profile_tariffs` (по **своей** ERD).
-- [ ] **Шаг 2:** Filament CRUD `TariffPlan` — тип `duration` | `quota`, поля по типу.
-- [ ] **Шаг 3:** страница `/tariffs` — карточки обоих типов; покупка через Paykeeper (отдельный `order` с `type=tariff` или связь `profile_tariff_id`).
-- [ ] **Шаг 4:** `TariffGate` при checkout: если активен тариф по дням → скидка/0 ₽; если по квоте → `reports_remaining--`.
-- [ ] **Шаг 5:** cron `tariffs:expire` — `ends_at` прошло → статус `expired`.
-- [ ] **Шаг 6:** тесты: квота 3 → 3 заказа без доплаты → 4-й требует оплату; duration — заказ в срок ok, после `ends_at` — полная цена.
-- [ ] `TIME_LOG`.
+**Прочитать:**
 
-## Схема БД
+| Тема | Документация |
+|------|----------------|
+| ERD шаблон | [docs/ERD.md](../docs/ERD.md) |
+| Решение заказчика | [QUESTIONS.md §0](../QUESTIONS.md) |
+
+**Сделать:**
+
+- Только **quota** (пакет N отчётов), **без** тарифов по сроку
+- Привязка `tariff_plan.service_id`; `profile_tariffs.reports_remaining`
+
+---
+
+## Шаг 1 — Миграции
+
+- [ ] `tariff_plans`, `profile_tariffs`
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Migrations | [Migrations](https://laravel.com/docs/migrations) |
+
+**Сделать:**
 
 ```text
-tariff_plans
-  - type: duration | quota
-  - name, price
-  - duration_days (nullable)     # для duration
-  - report_quota (nullable)      # для quota
-  - allowed_service_ids (json) # null = все услуги
-
-profile_tariffs
-  - profile_id, tariff_plan_id
-  - starts_at, ends_at (nullable)   # duration
-  - reports_remaining (nullable)    # quota
-  - status: active | expired | depleted
+tariff_plans: service_id, type=quota, name, price, report_quota
+profile_tariffs: profile_id, tariff_plan_id, reports_remaining, status
 ```
 
-## Как это работает для пользователя
+---
 
-### Тариф «30 дней» (duration)
+## Шаг 2 — Filament `TariffPlan`
 
-1. Покупает план на `/tariffs` → Paykeeper → `profile_tariffs.ends_at = now() + 30 days`.
-2. В период добавляет VIN в корзину → checkout → **0 ₽** или скидка (правило в `TariffGate`).
-3. После `ends_at` — снова обычные цены Offer.
+- [ ] CRUD планов по услуге
 
-### Тариф «10 отчётов» (quota)
+**Прочитать:**
 
-1. Покупает пакет → `reports_remaining = 10`.
-2. Каждый **оплаченный** заказ (или завершённый отчёт — зафиксируй в коде) → `--`.
-3. При `0` — `depleted`, checkout по полной цене.
+| Тема | Документация |
+|------|----------------|
+| Filament | [Resources](https://filamentphp.com/docs/panels/resources/getting-started) |
 
-### Оба тарифа сразу
+---
 
-Допустимо: duration даёт скидку, quota списывается первой — **правило приоритета** опиши в `TariffGate` (наставник проверит на code review).
+## Шаг 3 — Страница `/tariffs`
 
-## Зафиксировано
+- [ ] Карточки пакетов; покупка через Paykeeper
 
-- **Автопродление:** нет в MVP — клиент сам покупает тариф снова.
-- **8b (квота):** см. [QUESTIONS.md](../QUESTIONS.md) — на что тратится пакет «N отчётов».
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Paykeeper flow | [урок 03](03-orders-paykeeper-queue-integrations.md) |
+
+**Сделать:**
+
+- Отдельный order type или связь `profile_tariff_id` — зафиксировать в коде
+
+---
+
+## Шаг 4 — `TariffGate` при checkout
+
+- [ ] 1 заказ = −1 квота; любой Offer услуги = 1 единица
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Service container | [Service Container](https://laravel.com/docs/container) |
+
+**Сделать:**
+
+- При активном `profile_tariff` — списание или 0 ₽ по правилу 8b
+
+---
+
+## Шаг 5 — Cron `tariffs:expire` (если есть `ends_at`)
+
+- [ ] Для quota — статус `depleted` при 0
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Task Scheduling | [Scheduling](https://laravel.com/docs/scheduling) |
+
+---
+
+## Шаг 6 — Тесты квоты
+
+- [ ] 3 заказа по квоте → 4-й требует оплату
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Testing | [Testing](https://laravel.com/docs/testing) |
+
+**Зафиксировано:** без автопродления; квота только на свою услугу (8b).
+
+---
+
+## TIME_LOG
+
+- [ ] Записать часы
 
 ## Следующий урок
 
@@ -68,4 +125,4 @@ profile_tariffs
 
 ## Справочник
 
-> [11 Laravel theory 2](../../../homework/11-interview-laravel-theory-2.md).
+> [11 Laravel theory 2](../../../homework/11-interview-laravel-theory-2.md)

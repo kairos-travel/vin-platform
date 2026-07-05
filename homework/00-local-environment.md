@@ -1,312 +1,233 @@
 # Урок 00 — Окружение: VPS REG.RU + Laravel на сервере
 
-**Цель:** рабочий **staging на VPS** — SSH, домен, nginx, PHP, MySQL, Laravel, **HTTPS**. Код в `projects/vin-platform/` (в git), на сервере — clone в `/var/www/vin-platform`.
+**Цель:** staging на VPS — SSH, DNS, nginx, PHP, MySQL, Laravel, **HTTPS**. Код в `projects/vin-platform/`.
 
-**Можно начинать без ответов заказчика** по §0 и 8b — тарифы к **уроку 14**, ERD фазы A (урок 01) — без таблиц тарифов.
+**Можно начинать без ответов заказчика** по тарифам (урок 14) и ERD (урок 01).
 
-**Два пути (выбери один):**
+**Два пути:**
 
 | Путь | Когда |
 |------|--------|
-| **A. Сервер (рекомендуется)** | шаги 1–10 ниже — работаешь на VPS с урока 00 |
-| **B. Локально + VPS «впрок»** | Laravel на Mac (шаг 11B), VPS только заказан; деплой переносишь на шаги 4–10 позже |
+| **A — сервер (рекомендуется)** | шаги 1–9 ниже |
+| **B — локально** | шаг 10; VPS догоняешь шагами 1–6 до урока 01 |
 
-Перед стартом: [GLOSSARY.md](../GLOSSARY.md).
-
-## Задание (сдать наставнику)
-
-### Путь A — staging на сервере
-
-- [ ] **Шаг 1:** VPS REG.RU по чеклисту; SSH работает.
-- [ ] **Шаг 2:** DNS: A-записи `@` и `www` → IP VPS (`dig` OK).
-- [ ] **Шаг 3:** на сервере установлены nginx, PHP 8.3, MySQL, git, composer.
-- [ ] **Шаг 4:** Laravel в `/var/www/vin-platform`, `.env`, `key:generate`, `migrate` (пустая БД — OK).
-- [ ] **Шаг 5:** nginx отдаёт сайт; в браузере **https://твой-домен.ru** — стартовая Laravel (или http по IP, если домена нет).
-- [ ] **Шаг 6:** **HTTPS** (Let's Encrypt) — если домен уже указывает на IP.
-- [ ] **Шаг 7:** `php artisan test` на сервере — зелёный.
-- [ ] **Шаг 8:** текст 5–10 предложений: путь `GET /` (корневой урок 00 §33).
-- [ ] **Шаг 9:** код VIN только в `projects/vin-platform/`, не в корне mentorship.
-- [ ] **Собес:** §33, I0 — устно.
-- [ ] `TIME_LOG`.
-
-### Путь B — только локально (если VPS ещё не готов)
-
-- [ ] `composer create-project` в `projects/vin-platform/`, `php artisan serve`, тесты зелёные.
-- [ ] VPS + DNS + деплой — догоняешь шагами 1–6 **до урока 01**.
+**Перед стартом:** [GLOSSARY.md](../GLOSSARY.md)
 
 ---
 
-## Техника — путь A (сервер)
+## Шаг 1 — VPS на REG.RU
 
-### Шаг 1 — заказ VPS на REG.RU
+- [ ] SSH работает; Ubuntu 24.04, 2 GB RAM, публичный IP
 
-Разработка на сервере — **VPS / облачный сервер**, **не** виртуальный хостинг.
+**Прочитать:**
 
-#### Эталонная конфигурация
+| Тема | Ссылка |
+|------|--------|
+| SSH keys | [GitHub SSH docs](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) |
+| VPS vs shared hosting | [GLOSSARY.md](../GLOSSARY.md) |
 
-| Параметр | Выбор |
-|----------|--------|
-| **ОС** | Ubuntu **24.04 LTS** |
-| **Регион** | Москва-2 (или ДЦ в РФ) |
-| **CPU / RAM / диск** | 1 vCPU, **2 GB** RAM, 10 GB NVMe |
-| **Публичный IP** | **«Плавающий IP» — ВКЛ** (без него нет доступа из интернета) |
-| **Бэкап REG.RU** | выкл на staging |
+**Сделать:**
 
-#### В панели REG.RU
-
-1. VPS → **Своя конфигурация** → Ubuntu 24.04, 2 GB RAM, IP **включён**.
-2. SSH-ключ при заказе:
-   ```bash
-   ssh-keygen -t ed25519 -C "vin-platform"
-   cat ~/.ssh/id_ed25519.pub   # вставить в форму
-   ```
-3. Записать **IP** после статуса «Работает».
-
-#### Первый вход
-
-```bash
-ssh root@ВАШ_IP
-apt update && apt upgrade -y
-uname -a && free -h && df -h
-```
+- REG.RU → VPS → Ubuntu 24.04, 2 GB, **плавающий IP включён**
+- `ssh-keygen -t ed25519`; ключ в панели
+- `ssh root@IP` → `apt update && apt upgrade -y`
 
 ---
 
-### Шаг 2 — домен → IP (DNS)
+## Шаг 2 — DNS → IP
 
-1. REG.RU → **Домены** → твой домен → **Ресурсные записи**.
-2. Добавить:
+- [ ] `dig` показывает IP VPS для `@` и `www`
 
-| Имя | Тип | Значение |
-|-----|-----|----------|
-| `@` | A | `ВАШ_IP` |
-| `www` | A | `ВАШ_IP` |
+**Прочитать:**
 
-3. Проверка с Mac (подожди 5–30 мин):
+| Тема | Ссылка |
+|------|--------|
+| DNS A-record | [REG.RU help](https://www.reg.ru/support/) или документация регистратора |
 
-```bash
-dig +short example.ru A
-dig +short www.example.ru A
-```
+**Сделать:**
 
-**Без домена:** шаги 5–6 временно по `http://ВАШ_IP`; HTTPS — когда домен готов.
+- A-записи `@` и `www` → IP VPS
+- `dig +short example.ru A` с Mac (подождать 5–30 мин)
+- Без домена: временно по `http://IP`
 
 ---
 
-### Шаг 3 — стек на Ubuntu (на сервере)
+## Шаг 3 — Стек на Ubuntu
 
-Выполни **под root** (или через `sudo`):
+- [ ] nginx, PHP 8.3, MySQL, git, composer
+
+**Прочитать:**
+
+| Тема | Ссылка |
+|------|--------|
+| Laravel server requirements | [Server Requirements](https://laravel.com/docs/deployment#server-requirements) |
+| nginx + PHP-FPM | [Deployment — nginx](https://laravel.com/docs/deployment#nginx) |
+
+**Сделать:**
 
 ```bash
 apt install -y nginx mysql-server git unzip curl \
   php8.3-fpm php8.3-cli php8.3-mysql php8.3-xml php8.3-mbstring \
   php8.3-curl php8.3-zip php8.3-bcmath
-
 curl -sS https://getcomposer.org/installer | php
 mv composer.phar /usr/local/bin/composer
-composer -V
-php -v
 ```
 
-**MySQL — пользователь для Laravel:**
-
-```bash
-mysql
-```
-
-```sql
-CREATE DATABASE vin_platform CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'vin'@'localhost' IDENTIFIED BY 'СМЕНИ_ПАРОЛЬ';
-GRANT ALL ON vin_platform.* TO 'vin'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
-```
-
-**Firewall (опционально, но полезно):**
-
-```bash
-ufw allow OpenSSH
-ufw allow 'Nginx Full'
-ufw enable
-```
+- MySQL: БД `vin_platform`, user `vin`, пароль свой
+- `ufw allow OpenSSH && ufw allow 'Nginx Full' && ufw enable` (опц.)
 
 ---
 
-### Шаг 4 — Laravel на сервере
+## Шаг 4 — Laravel на сервере
 
-**Вариант 1 — git (рекомендуется):** код на Mac в `projects/vin-platform/`, push в GitHub/GitLab, на сервере:
+- [ ] `/var/www/vin-platform`, `.env`, `migrate`, права `storage`
 
-```bash
-mkdir -p /var/www
-cd /var/www
-git clone https://github.com/ТЫ/vin-platform.git vin-platform
-cd vin-platform
-composer install --no-dev --optimize-autoloader   # на staging можно без --no-dev
-cp .env.example .env
-php artisan key:generate
-```
+**Прочитать:**
 
-**Вариант 2 — создать на сервере** (если репо ещё нет):
+| Тема | Ссылка |
+|------|--------|
+| Deployment | [Laravel Deployment](https://laravel.com/docs/deployment) |
+| `.env` | [Configuration](https://laravel.com/docs/configuration#environment-configuration) |
 
-```bash
-cd /var/www
-composer create-project laravel/laravel vin-platform
-cd vin-platform
-```
+**Сделать:**
 
-**`.env` на сервере (минимум):**
-
-```env
-APP_NAME="Vin Platform"
-APP_ENV=staging
-APP_DEBUG=true
-APP_URL=https://example.ru
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=vin_platform
-DB_USERNAME=vin
-DB_PASSWORD=СМЕНИ_ПАРОЛЬ
-```
-
-```bash
-php artisan migrate   # только стандартные таблицы Laravel — OK
-chown -R www-data:www-data /var/www/vin-platform
-chmod -R ug+rwx storage bootstrap/cache
-```
+- `git clone` в `/var/www/vin-platform` (или `create-project`)
+- `.env`: `APP_ENV=staging`, `APP_URL`, MySQL
+- `composer install`, `php artisan key:generate`, `php artisan migrate`
+- `chown -R www-data:www-data` + права на `storage`, `bootstrap/cache`
 
 ---
 
-### Шаг 5 — nginx
+## Шаг 5 — nginx
 
-Файл `/etc/nginx/sites-available/vin-platform`:
+- [ ] Сайт открывается в браузере
 
-```nginx
-server {
-    listen 80;
-    server_name example.ru www.example.ru;
-    root /var/www/vin-platform/public;
+**Прочитать:**
 
-    add_header X-Frame-Options "SAMEORIGIN";
-    add_header X-Content-Type-Options "nosniff";
+| Тема | Ссылка |
+|------|--------|
+| nginx config | [Deployment — nginx](https://laravel.com/docs/deployment#nginx) |
 
-    index index.php;
-    charset utf-8;
+**Сделать:**
 
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    location ~ /\.(?!well-known).* {
-        deny all;
-    }
-}
-```
-
-```bash
-ln -sf /etc/nginx/sites-available/vin-platform /etc/nginx/sites-enabled/
-rm -f /etc/nginx/sites-enabled/default
-nginx -t && systemctl reload nginx
-```
-
-Проверка: `http://example.ru` или `http://ВАШ_IP` — страница Laravel.
+- `/etc/nginx/sites-available/vin-platform` → `root .../public`, `try_files`, php-fpm socket
+- `nginx -t && systemctl reload nginx`
+- Проверка: `http://домен` или `http://IP`
 
 ---
 
-### Шаг 6 — HTTPS (Let's Encrypt)
+## Шаг 6 — HTTPS (Let's Encrypt)
 
-**Только если** DNS уже указывает на VPS:
+- [ ] `https://домен` с замком в браузере
 
-```bash
-apt install -y certbot python3-certbot-nginx
-certbot --nginx -d example.ru -d www.example.ru
-```
+**Прочитать:**
 
-Certbot сам поправит nginx. Проверка: `https://example.ru`.
+| Тема | Ссылка |
+|------|--------|
+| Certbot | [certbot.eff.org](https://certbot.eff.org/) |
 
-Автопродление: `certbot renew --dry-run`.
+**Сделать:**
 
-**Paykeeper webhook** (урок 03+) будет на `https://example.ru/webhooks/paykeeper` — без HTTPS не заработает.
+- Только если DNS уже на VPS
+- `apt install certbot python3-certbot-nginx`
+- `certbot --nginx -d example.ru -d www.example.ru`
+- `certbot renew --dry-run`
 
----
-
-### Шаг 7 — тесты на сервере
-
-```bash
-cd /var/www/vin-platform
-php artisan test
-```
+*Paykeeper webhook (урок 03) требует HTTPS.*
 
 ---
 
-### Шаг 8 — путь запроса `GET /`
+## Шаг 7 — Тесты на сервере
 
-Напиши наставнику 5–10 предложений (см. корневой [homework/00 §33](../../../homework/00-local-environment-routing-tests.md)). На сервере цепочка та же: `public/index.php` → nginx → `php-fpm` → Laravel.
+- [ ] `php artisan test` — зелёный
 
----
+**Прочитать:**
 
-### Шаг 9 — граница репозитория
-
-- Учебный код VIN — **`projects/vin-platform/`** в git mentorship (или отдельный repo → clone в `/var/www/vin-platform`).
-- Корень `laravel-mentorship/` — доки, homework, interview; **не** смешивать с VIN-приложением.
-- Секреты — только `.env` на сервере, не в git.
+| Тема | Ссылка |
+|------|--------|
+| Testing | [Testing](https://laravel.com/docs/testing) |
 
 ---
 
-### Работа на сервере дальше (уроки 01+)
+## Шаг 8 — Путь запроса `GET /`
 
-| Задача | Как |
-|--------|-----|
-| Редактировать код | Cursor локально → git push → на VPS `git pull` **или** SSH + nano/vim (неудобно) |
-| Миграции | `php artisan migrate` на VPS |
-| Очередь | `queue:work` — **урок 05** (systemd или Docker) |
-| Деплой обновлений | `git pull && composer install && php artisan migrate --force && php artisan config:cache` |
+- [ ] 5–10 предложений наставнику
 
-**Параллельно:** отправь заказчику [QUESTIONS_FOR_CLIENT.md](../QUESTIONS_FOR_CLIENT.md) — тарифы к **уроку 14**.
+**Прочитать:**
+
+| Тема | Ссылка |
+|------|--------|
+| Request lifecycle | [Request Lifecycle](https://laravel.com/docs/lifecycle) |
+| Корневой урок §33 | [00-local-environment-routing-tests.md](../../../homework/00-local-environment-routing-tests.md) |
+
+**Сделать:**
+
+- Описать: nginx → `public/index.php` → Laravel → route → response
 
 ---
 
-## Техника — путь B (локально)
+## Шаг 9 — Граница репозитория
+
+- [ ] Код VIN только в `projects/vin-platform/`; `.env` не в git
+
+**Сделать:**
+
+- Mentorship root — docs/homework; VIN-app — отдельная папка / repo
+- Секреты только на сервере
+
+**Дальше (уроки 01+):** локально код → `git push` → на VPS `git pull`; очередь — урок 05.
+
+---
+
+## Шаг 10 — Путь B (только локально)
+
+- [ ] `composer install`, `php artisan serve`, тесты зелёные
+
+**Прочитать:**
+
+| Тема | Ссылка |
+|------|--------|
+| Installation | [Installation](https://laravel.com/docs/installation) |
+
+**Сделать:**
 
 ```bash
 cd projects/vin-platform
-composer create-project laravel/laravel . --prefer-dist   # если папка пустая
-# или: composer install
+composer install
 cp .env.example .env
 php artisan key:generate
 php artisan serve
 php artisan test
 ```
 
-SQLite для старта: `DB_CONNECTION=sqlite`, `touch database/database.sqlite`.
-
-Деплой на VPS — шаги 1–6 пути A **до начала урока 01**.
+- VPS шаги 1–6 — **до урока 01**
 
 ---
 
+## Собес
+
+- [ ] §33, I0 — устно · `artisan serve` vs nginx+php-fpm — на staging только nginx
+
+## TIME_LOG
+
+- [ ] Записать часы
+
 ## Критерии сдачи (путь A)
 
-| Шаг | Доказательство |
-|-----|----------------|
-| VPS | IP, 2 GB RAM, SSH OK |
+| | Доказательство |
+|---|----------------|
+| VPS | IP, SSH OK |
 | DNS | `dig` → IP |
-| Сайт | скрин `https://домен` или `http://IP` — Laravel welcome |
-| HTTPS | скрин замка в браузере (если есть домен) |
-| Тесты | вывод `php artisan test` |
+| Сайт | скрин Laravel welcome |
+| HTTPS | замок в браузере (если есть домен) |
+| Тесты | `php artisan test` |
 
 ## Следующий урок
 
-[01 — ERD, миграции, политики](01-domain-migrations-policies.md) — миграции уже на **staging VPS** или локально, как договоритесь с наставником.
+[01 — ERD, миграции, политики](01-domain-migrations-policies.md)
 
 ---
 
 ## Справочник
 
-> Собес: [homework/00 §33, I0](../../../homework/00-local-environment-routing-tests.md). **I0:** `artisan serve` vs nginx+php-fpm — на staging только nginx.
+> [homework/00 §33, I0](../../../homework/00-local-environment-routing-tests.md) · [QUESTIONS_FOR_CLIENT.md](../QUESTIONS_FOR_CLIENT.md)

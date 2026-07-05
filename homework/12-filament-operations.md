@@ -1,40 +1,86 @@
 # Урок 12 — Filament: операции и поддержка бизнеса
 
-**Цель:** админка для оператора: заказы, платежи, отчёты, логи интеграций, ручной **retry** Job.
+**Цель:** админка для оператора: заказы, отчёты, логи, ручной **retry** Job.
 
-## Задание (сдать наставнику)
+**Перед стартом:** уроки **02**, **09**, **10**
 
-- [ ] **Шаг 1:** Filament Resource `Order` — read-only список, фильтр по статусу, relation items/payments.
-- [ ] **Шаг 2:** Resource `Report` — статус, ссылка на файл, `meta.partial`.
-- [ ] **Шаг 3:** Resource `IntegrationLog` — поиск по `order_item_id`, provider.
-- [ ] **Шаг 4:** Action «Перезапустить генерацию» на failed Report → `GenerateReportsJob::dispatch`.
-- [ ] **Шаг 5:** Action «Отменить заказ» — только `pending_payment` / согласованная политика.
-- [ ] **Шаг 6:** дашборд: счётчики open tickets, failed reports, orders today.
-- [ ] **Собес:** §42 (админка vs API) — устно.
-- [ ] `TIME_LOG`.
+---
 
-## Перед ДЗ
+## Шаг 1 — Resource `Order`
 
-- Уроки **02**, **09**, **10**
+- [ ] Read-only список, фильтры, relations items/payments
 
-## Техника
+**Прочитать:**
 
-### Retry
+| Тема | Документация |
+|------|----------------|
+| Filament tables | [Tables](https://filamentphp.com/docs/tables) |
+| Relation managers | [Relation Managers](https://filamentphp.com/docs/panels/resources/relation-managers) |
 
-```php
-Tables\Actions\Action::make('retry')
-    ->visible(fn (Report $r) => $r->status === 'failed')
-    ->action(function (Report $report) {
-        $report->update(['status' => 'processing']);
-        GenerateReportsJob::dispatch($report->orderItem);
-    });
-```
+---
 
-### Права
+## Шаг 2 — Resource `Report`
 
-Только роль **`admin`** (п. M4). Роль `support` **не делаем** в MVP — тикеты смотришь ты же в Filament. Клиентский `User` не имеет доступа в панель (`canAccessPanel`).
+- [ ] Статус, файл, `meta.partial`
 
-**Критерий:** оператор видит failed отчёт, жмёт retry, воркер поднимает статус.
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Filament Resources | [Resources](https://filamentphp.com/docs/panels/resources/getting-started) |
+
+---
+
+## Шаг 3 — Resource `IntegrationLog`
+
+- [ ] Поиск по `order_item_id`, provider
+
+**Сделать:**
+
+- Read-only или ограниченное редактирование
+
+---
+
+## Шаг 4 — Action «Перезапустить генерацию»
+
+- [ ] На `failed` Report → `GenerateReportsJob::dispatch`
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Actions | [Actions](https://filamentphp.com/docs/actions) |
+| Queues | [Queues](https://laravel.com/docs/queues) |
+
+---
+
+## Шаг 5 — Action «Отменить заказ»
+
+- [ ] Только `pending_payment` (согласованная политика)
+
+---
+
+## Шаг 6 — Дашборд
+
+- [ ] Счётчики: open tickets, failed reports, orders today
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Widgets | [Widgets](https://filamentphp.com/docs/panels/dashboard) |
+
+**Критерий:** оператор жмёт retry → воркер поднимает статус. Только роль `admin` (`canAccessPanel`).
+
+---
+
+## Собес
+
+- [ ] §42 (админка vs API) — устно
+
+## TIME_LOG
+
+- [ ] Записать часы
 
 ## Следующий урок
 
@@ -44,4 +90,4 @@ Tables\Actions\Action::make('retry')
 
 ## Справочник
 
-> Старый [02-api-sanctum](../../../homework/02-api-sanctum-resources.md) (events) — структура API.
+> [02-api-sanctum](../../../homework/02-api-sanctum-resources.md)

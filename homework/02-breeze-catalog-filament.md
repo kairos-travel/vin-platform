@@ -1,61 +1,212 @@
 # Урок 02 — Breeze, главная, Filament-каталог
 
-**Цель:** регистрация/вход; главная с карточками **нескольких** услуг (VIN обязателен); админка Filament для `Service` + `ServiceOffer`.
+**Цель:** регистрация/вход; **публичная вёрстка** (Blade + Tailwind) главной и страницы VIN; админка Filament для `Service` + `ServiceOffer`.
 
-## Задание (сдать наставнику)
+**Пакет A:** на главной акцент на **одну услугу VIN**; в сидере — 3 услуги (VIN + 2 заглушки). **11 карточек** — пакет B. Вёрстка — [Figma](https://www.figma.com/design/lH5KkodmwnpGfS3pv1SzFD/Vin-%D0%BE%D1%82%D1%87%D0%B5%D1%82); pixel-perfect не требуется.
 
-- [ ] **Шаг 1:** Laravel Breeze (Blade + Tailwind), профиль привязан к `Profile` (создавать при регистрации).
-- [ ] **Шаг 2:** `GET /` — главная по [Figma](https://www.figma.com/design/lH5KkodmwnpGfS3pv1SzFD/Vin-%D0%BE%D1%82%D1%87%D0%B5%D1%82): сетка услуг из БД; неактивные / без офферов — «Скоро».
-- [ ] **Шаг 3:** страница услуги `GET /services/{slug}` — список офферов VIN (пакеты), цена, состав (`document_types`).
-- [ ] **Шаг 4:** Filament: CRUD `Service`, `ServiceOffer` (цены и состав пакетов — **из админки**, не хардкод).
-- [ ] **Шаг 5:** сидер: минимум 3 услуги (VIN + 2 заглушки), у VIN — 2–3 оффера; одна услуга **без** офферов («Скоро»).
-- [ ] **Шаг 6:** в шапке/футере ссылка на `/tariffs` (страница-заглушка до [урока 14](14-subscriptions-tariffs.md)).
-- [ ] **Собес:** §37 (middleware auth), §23 (сравнение с Bitrix инфоблоком) — устно.
-- [ ] `TIME_LOG`.
+**Перед стартом:** урок **01** сдан · `php artisan serve` + `npm run dev` · [GLOSSARY.md](../GLOSSARY.md) — Breeze, Filament · [DOMAIN.md](../DOMAIN.md) — каталог, правило «Скоро»
 
-## Перед ДЗ
+---
 
-**Термины (прочитать):** [GLOSSARY.md](../GLOSSARY.md) — **Breeze**, **Filament**.
+## Шаг 1 — Auth (Breeze)
 
-- [Breeze](https://laravel.com/docs/starter-kits#laravel-breeze)
-- [Filament](https://filamentphp.com/docs)
-- Урок **01** сдан
+- [ ] Breeze установлен; при регистрации создаётся `Profile`; базовый ЛК работает
 
-**Правило каталога:** активная `Service` в витрине — **минимум 1 Offer**; иначе «Скоро» (`is_active=false`).
+**Прочитать:**
 
-## Техника
 
-### Шаг 1 — Breeze + Profile
+| Тема                       | Документация                                                                                                                                                                      |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Breeze (Blade)             | [Laravel Breeze (дока 11.x, команды те же)](https://laravel.com/docs/11.x/starter-kits#laravel-breeze) · [artisan breeze:install (13.x)](https://artisan.page/13.x/breezeinstall) |
+| Событие `Registered`       | [Authentication](https://laravel.com/docs/authentication)                                                                                                                         |
+| Listeners                  | [Events](https://laravel.com/docs/events), [Defining Listeners](https://laravel.com/docs/events#defining-listeners)                                                               |
+| Middleware `auth`, `guest` | [Middleware](https://laravel.com/docs/middleware)                                                                                                                                 |
+| Связанная запись `Profile` | [Eloquent Relationships](https://laravel.com/docs/eloquent-relationships)                                                                                                         |
 
-После `php artisan breeze:install blade`:
 
-- Observer или listener: при `Registered` создать `Profile` для `user_id`.
-- ЛК: маршруты `dashboard` → редирект в разделы (пока заглушки «Профиль», «Заказы», «Отчёты»).
+*Observer vs listener:* [Eloquent Observers](https://laravel.com/docs/eloquent#observers) — для сравнения; для `Registered` нужен **listener**.
 
-### Шаг 2 — главная
+**Сделать:**
 
-- `Service::where('is_active', true)->orderBy('sort_order')`
-- Карточка: название, краткое описание, ссылка на `/services/{slug}`
-- Tailwind — ориентир Figma, pixel-perfect не требуется
+- `composer require laravel/breeze --dev` → `php artisan breeze:install blade`
+- `npm install && npm run build` (или `npm run dev`)
+- Listener на `Registered` → создать `Profile` для `user_id`
+- Проверить страницы: `/login`, `/register`, `/dashboard`, `/profile`
+- `dashboard` — заглушки навигации: «Профиль», «Заказы», «Отчёты»
 
-### Шаг 3 — офферы VIN
+**Критерий:** регистрация → в БД есть `users` + `profiles`.
 
-- Показать `document_types` человекочитаемо («VIN-справка», «Штрафы»)
-- Кнопка «Заказать» → ведёт на урок 03 (пока route-заглушка)
+---
 
-### Шаг 4 — Filament
+## Шаг 2 — Layout публичного сайта
+
+- [ ] Общий layout: шапка, футер, меню; наследуют главная и страница услуги
+
+**Прочитать:**
+
+
+| Тема          | Документация                                                                                               |
+| ------------- | ---------------------------------------------------------------------------------------------------------- |
+| Blade layouts | [Blade Templates](https://laravel.com/docs/blade), [Components](https://laravel.com/docs/blade#components) |
+| Vite          | [Asset Bundling](https://laravel.com/docs/vite)                                                            |
+
+
+**Сделать:**
+
+- Отдельный layout сайта (не смешивать с Breeze auth layout)
+- **Шапка:** логотип, меню (главная, тарифы), вход/регистрация или пользователь + выход
+- **Футер:** тарифы, политика (заглушка до урока 06), копирайт
+- `@vite(['resources/css/app.css', 'resources/js/app.js'])`
+
+**Критерий:** шапка/футер не дублируются в каждом view.
+
+---
+
+## Шаг 3 — Главная `GET /`
+
+- [ ] Главная из БД, desktop по Figma; «Скоро» для услуг без офферов
+
+**Прочитать:**
+
+
+| Тема               | Документация                                                                                 |
+| ------------------ | -------------------------------------------------------------------------------------------- |
+| Controllers, views | [Controllers](https://laravel.com/docs/controllers), [Views](https://laravel.com/docs/views) |
+| Routing            | [Routing](https://laravel.com/docs/routing)                                                  |
+| Выборка каталога   | [Retrieving Models](https://laravel.com/docs/eloquent#retrieving-models)                     |
+| Tailwind           | [Tailwind Docs](https://tailwindcss.com/docs)                                                |
+| Пакет A — главная  | [A-mvp-client.md](../docs/packages/A-mvp-client.md)                                          |
+
+
+**Сделать:**
+
+- Controller: `Service::where('is_active', true)->orderBy('sort_order')`
+- Hero / блок VIN (пакет A); сетка карточек из сидера
+- Карточка без офферов → «Скоро»
+- Данные только из БД
+
+**Критерий:** смена `Service` в Filament отражается на главной.
+
+---
+
+## Шаг 4 — Страница услуги `GET /services/{slug}`
+
+- [ ] Офферы, цены, состав PDF; кнопка-заглушка «Заказать»
+
+**Прочитать:**
+
+
+| Тема                | Документация                                                                   |
+| ------------------- | ------------------------------------------------------------------------------ |
+| Route Model Binding | [Route Model Binding](https://laravel.com/docs/routing#route-model-binding)    |
+| Eager loading       | [Eager Loading](https://laravel.com/docs/eloquent-relationships#eager-loading) |
+
+
+**Сделать:**
+
+- Binding по `slug`; `Service` + активные `serviceOffers`
+- Список офферов: цена, `document_types` по-русски
+- Кнопка «Заказать» / «В корзину» → заглушка (урок 07)
+- VIN/ГРЗ/СТС — disabled inputs до урока 07
+
+**Критерий:** смена цены в Filament видна после refresh.
+
+---
+
+## Шаг 5 — Filament
+
+- [ ] CRUD `Service` и `ServiceOffer` в админке
+
+**Прочитать:**
+
+
+| Тема      | Документация                                                                          |
+| --------- | ------------------------------------------------------------------------------------- |
+| Установка | [Filament — Installation](https://filamentphp.com/docs/panels/installation)           |
+| Resources | [Filament — Resources](https://filamentphp.com/docs/panels/resources/getting-started) |
+| Forms     | [Filament — Forms](https://filamentphp.com/docs/forms)                                |
+
+
+**Сделать:**
 
 ```bash
 composer require filament/filament
 php artisan filament:install --panels
 ```
 
-- Resource для `Service` и `ServiceOffer`
-- В оффере: multiselect/checkboxes для `document_types`
+- Resource `Service`, `ServiceOffer` (в т.ч. multiselect `document_types`)
+- Доступ в панель только admin (`canAccessPanel`)
 
-**Критерий:** изменение цены в Filament отражается на публичной странице.
+**Критерий:** цены и офферы меняются без правки кода.
 
-**П.2 зафиксировано:** только зарегистрированные пользователи; корзина привязана к `Profile`.
+---
+
+## Шаг 6 — Сидер
+
+- [ ] Минимум 3 услуги; у VIN — 2–3 оффера; одна без офферов
+
+**Прочитать:**
+
+
+| Тема             | Документация                                                      |
+| ---------------- | ----------------------------------------------------------------- |
+| Seeding          | [Database Seeding](https://laravel.com/docs/seeding)              |
+| Factories (опц.) | [Eloquent Factories](https://laravel.com/docs/eloquent-factories) |
+
+
+**Сделать:**
+
+- VIN (активна) + 2 заглушки; 2–3 оффера у VIN с разными `document_types`
+- Одна услуга без офферов → «Скоро» на витрине
+- `php artisan db:seed`
+
+---
+
+## Шаг 7 — Адаптив (пакет A)
+
+- [ ] Mobile/tablet: главная, VIN, auth, dashboard/profile
+
+**Прочитать:**
+
+
+| Тема                | Документация                                                        |
+| ------------------- | ------------------------------------------------------------------- |
+| Tailwind responsive | [Responsive Design](https://tailwindcss.com/docs/responsive-design) |
+| Список страниц MVP  | [A-mvp-client.md § Адаптив](../docs/packages/A-mvp-client.md)       |
+| Часы в смете        | [A-mvp-checklist.md](../docs/packages/A-mvp-checklist.md)           |
+
+
+**Сделать:**
+
+- `sm:`, `md:`, `lg:`; бургер-меню; карточки в колонку на узком экране
+- Корзина, checkout, `/privacy` — адаптив в уроках **07**, **06**
+
+**Критерий:** читаемо на 320px+ и планшете.
+
+---
+
+## Шаг 8 — Заглушка `/tariffs`
+
+- [ ] Страница «Скоро» + ссылки в шапке/футере
+
+**Прочитать:**
+
+- [14-subscriptions-tariffs.md](14-subscriptions-tariffs.md) — что будет позже
+
+**Сделать:**
+
+- `GET /tariffs` — простая заглушка
+- Ссылки из layout (шаг 2)
+
+---
+
+## Собес
+
+- [ ] §37 (middleware auth), §23 (Bitrix инфоблок) — устно · [100 вопросов](../../../interview/100-questions-middle.md)
+
+## TIME_LOG
+
+- [ ] Записать часы
 
 ## Следующий урок
 
@@ -65,4 +216,5 @@ php artisan filament:install --panels
 
 ## Справочник
 
-> [DOMAIN.md](../DOMAIN.md) — Service + Offer. Собесы: [10](../../../homework/10-interview-laravel-theory-1.md), [12 Bitrix](../../../homework/12-interview-bitrix.md).
+> [DOMAIN.md](../DOMAIN.md) · [A-mvp-checklist.md](../docs/packages/A-mvp-checklist.md)
+

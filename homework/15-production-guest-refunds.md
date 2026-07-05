@@ -1,43 +1,100 @@
 # Урок 15 — Прод: возвраты, мониторинг, runbook
 
-**Цель:** коммерческая готовность без гостевого checkout (**п.2 — только регистрация**): возвраты Paykeeper, failed jobs, rate limit, health, runbook.
+**Цель:** коммерческая готовность: возвраты, failed jobs, rate limit, health, runbook.
 
-## Задание (сдать наставнику)
+**Перед стартом:** уроки **06**, **11**, **12** · [GLOSSARY.md](../GLOSSARY.md)
 
-- [ ] **Шаг 1:** возврат **вручную**: в Filament Action «Отметить возврат» + фактический возврат в кабинете Paykeeper; `Payment::refunded`; отмена Job если отчёт `processing`. Авто-возврат — не в MVP.
-- [ ] **Шаг 2:** `failed_jobs` — просмотр в Filament или `reports:retry-failed`.
-- [ ] **Шаг 3:** rate limit на `/webhooks/paykeeper` и формы заказа.
-- [ ] **Шаг 4:** `/up` health; README runbook: worker, queue, backup БД, PDF ([local или S3](../GLOSSARY.md#nightly-sync-в-object-storage)).
-- [ ] **Шаг 5:** если **10b = local на VPS** — документировать nightly backup; если S3 — versioning бакета.
-- [ ] **Шаг 6:** финальный pitch EN 60 сек + скриншоты.
-- [ ] **Собес:** идемпотентность, 152-ФЗ — устно.
-- [ ] `TIME_LOG`.
+---
 
-## Перед ДЗ
+## Шаг 1 — Возврат вручную
 
-- [GLOSSARY.md](../GLOSSARY.md) — webhook, ретраи
-- Уроки **06**, **11**, **12**
+- [ ] Filament Action + Paykeeper; `Payment::refunded`; отмена Job
 
-## Техника
+**Прочитать:**
 
-### Возврат до готового PDF
+| Тема | Документация |
+|------|----------------|
+| Filament Actions | [Actions](https://filamentphp.com/docs/actions) |
+| Queues | [Queues](https://laravel.com/docs/queues) |
 
-Webhook или Action в Filament → `Payment::refunded`, `Order::cancelled`, не отдавать скачивание.
+**Сделать:**
 
-### Мониторинг (минимум)
+- Авто-возврат — не в MVP
+- До готового PDF — не отдавать download
 
-- Log channel `integration`
-- Uptime `/up`
-- Опционально: Sentry — в README как next step
+---
+
+## Шаг 2 — `failed_jobs`
+
+- [ ] Просмотр в Filament или `reports:retry-failed`
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Failed jobs | [Dealing With Failed Jobs](https://laravel.com/docs/queues#dealing-with-failed-jobs) |
+
+---
+
+## Шаг 3 — Rate limiting
+
+- [ ] На webhook и формы заказа
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Rate limiting | [Rate Limiting](https://laravel.com/docs/routing#rate-limiting) |
+
+---
+
+## Шаг 4 — Health + runbook
+
+- [ ] `/up`; README: worker, queue, backup БД + PDF
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Health | [Health Checks](https://laravel.com/docs/deployment#the-health-route) |
+| Deployment | [Deployment](https://laravel.com/docs/deployment) |
+
+---
+
+## Шаг 5 — Backup PDF
+
+- [ ] local VPS — nightly backup; S3 — versioning
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| GLOSSARY backup | [GLOSSARY.md](../GLOSSARY.md) |
+
+---
+
+## Шаг 6 — Финальный pitch + скриншоты
+
+- [ ] Pitch EN 60 сек
 
 **Критерий:** по README наставник поднимает staging с worker и webhook.
 
-## Финал трека VIN 00–15
+---
 
-Собесы **07–14** в корне — продолжать параллельно.
+## Собес
+
+- [ ] Идемпотентность, 152-ФЗ — устно
+
+## TIME_LOG
+
+- [ ] Записать часы
+
+## Финал трека 00–15
+
+Собесы **07–14** в корне — параллельно.
 
 ---
 
 ## Справочник
 
-> [06 — privacy](06-deploy-readme-privacy.md). [14 system design](../../../homework/14-interview-system-design-livecoding.md).
+> [06 — privacy](06-deploy-readme-privacy.md) · [14 system design](../../../homework/14-interview-system-design-livecoding.md)

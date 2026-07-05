@@ -1,48 +1,101 @@
 # Урок 13 — API Sanctum (`/api/v1`)
 
-**Цель:** API для мобильного клиента или партнёров: каталог, заказы, отчёты — с Sanctum и JSON Resources.
+**Цель:** API для мобильного/партнёров: каталог, заказы, отчёты — Sanctum + JSON Resources.
 
-## Задание (сдать наставнику)
+**Перед стартом:** уроки **03**, **07** · корневой [02-api-sanctum](../../../homework/02-api-sanctum-resources.md)
 
-- [ ] **Шаг 1:** prefix `v1`, `auth:sanctum` на защищённых маршрутах.
-- [ ] **Шаг 2:** `GET /api/v1/services`, `GET /api/v1/services/{slug}/offers` — публично или с токеном.
-- [ ] **Шаг 3:** `POST /api/v1/orders` — создать заказ (одна позиция или из корзины — как в 07).
-- [ ] **Шаг 4:** `GET /api/v1/orders`, `GET /api/v1/reports` — только свои (Policy).
-- [ ] **Шаг 5:** `ServiceResource`, `ServiceOfferResource`, `OrderResource`, `ReportResource`; пагинация; 422 с `errors`.
-- [ ] **Шаг 6:** тесты API: 401 без токена, 403 чужой заказ.
-- [ ] **Собес:** §42, §46 — устно.
-- [ ] `TIME_LOG`.
+---
 
-## Перед ДЗ
+## Шаг 1 — Prefix `v1`, `auth:sanctum`
 
-- [Sanctum](https://laravel.com/docs/sanctum), [API Resources](https://laravel.com/docs/eloquent-resources)
-- Корневой [02-api-sanctum](../../../homework/02-api-sanctum-resources.md) — эталон структуры
-- Уроки **03**, **07**
+- [ ] Защищённые маршруты с токеном
 
-## Техника
+**Прочитать:**
 
-### Маршруты (черновик)
+| Тема | Документация |
+|------|----------------|
+| Sanctum | [Laravel Sanctum](https://laravel.com/docs/sanctum) |
+| API routing | [Routing](https://laravel.com/docs/routing#api-routes) |
 
-```php
-Route::prefix('v1')->group(function () {
-    Route::get('services', ...);
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::apiResource('orders', ...)->only(['index', 'store', 'show']);
-        Route::get('reports', ...);
-    });
-});
-```
+---
 
-Оплата через Paykeeper остаётся **web redirect** + webhook — не через JSON (или отдельный `payment_url` в ответе).
+## Шаг 2 — Публичный каталог
 
-**Критерий:** Postman/curl с Bearer — список своих отчётов.
+- [ ] `GET /api/v1/services`, `GET /api/v1/services/{slug}/offers`
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| API Resources | [Eloquent API Resources](https://laravel.com/docs/eloquent-resources) |
+
+---
+
+## Шаг 3 — `POST /api/v1/orders`
+
+- [ ] Создание заказа (как в 03/07)
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Validation | [Validation](https://laravel.com/docs/validation) |
+
+---
+
+## Шаг 4 — Свои orders и reports
+
+- [ ] `GET` списки — Policy, только свои
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Authorization | [Authorization](https://laravel.com/docs/authorization) |
+
+---
+
+## Шаг 5 — Resources + пагинация + 422
+
+- [ ] `ServiceResource`, `OrderResource`, `ReportResource`…
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Pagination | [API Resource Pagination](https://laravel.com/docs/eloquent-resources#pagination) |
+| Error responses | [Validation Error Format](https://laravel.com/docs/validation#validation-error-response-format) |
+
+---
+
+## Шаг 6 — Тесты API
+
+- [ ] 401 без токена; 403 чужой заказ
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| HTTP Tests | [HTTP Tests](https://laravel.com/docs/http-tests) |
+
+**Критерий:** Postman/curl с Bearer — свои отчёты. Оплата — web Paykeeper + webhook (или `payment_url` в ответе).
+
+---
+
+## Собес
+
+- [ ] §42, §46 — устно
+
+## TIME_LOG
+
+- [ ] Записать часы
 
 ## Следующий урок
 
-[14 — тарифы и подписки](14-subscriptions-tariffs.md)
+[14 — тарифы](14-subscriptions-tariffs.md)
 
 ---
 
 ## Справочник
 
-> [10 Laravel theory 1](../../../homework/10-interview-laravel-theory-1.md) §42.
+> [10 Laravel theory 1](../../../homework/10-interview-laravel-theory-1.md) §42

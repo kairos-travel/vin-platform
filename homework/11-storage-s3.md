@@ -1,52 +1,102 @@
 # Урок 11 — Хранение отчётов: local и S3
 
-**Цель:** абстракция дисков Laravel; **prod** — PDF в S3, скачивание через **temporary signed URL**.
+**Цель:** диски Laravel; prod — PDF в S3, **temporary signed URL**.
 
-## Задание (сдать наставнику)
+**Перед стартом:** урок **10**
 
-- [ ] **Шаг 1:** поля `reports.file_disk`, `reports.file_path`; миграция при необходимости.
-- [ ] **Шаг 2:** `config/filesystems.php` — диск `reports` (local + s3 из `.env`).
-- [ ] **Шаг 3:** `GenerateReportsJob` пишет через `Storage::disk(config('filesystems.reports'))`.
-- [ ] **Шаг 4:** `ReportDownloadController` — Policy + `temporaryUrl` (15 мин) для s3; `download()` для local.
-- [ ] **Шаг 5:** `.env.example` — `REPORTS_DISK=local`; документация для prod: `s3`, ключи AWS/YC.
-- [ ] **Шаг 6:** тест с `Storage::fake('s3')`.
-- [ ] **Собес:** зачем S3 при нескольких воркерах — устно.
-- [ ] `TIME_LOG`.
+---
 
-## Перед ДЗ
+## Шаг 1 — Поля `file_disk`, `file_path`
 
-- [Filesystem](https://laravel.com/docs/filesystem)
-- Урок **10**
+- [ ] Миграция при необходимости
 
-## Техника
+**Прочитать:**
 
-### .env
+| Тема | Документация |
+|------|----------------|
+| Migrations | [Migrations](https://laravel.com/docs/migrations) |
 
-```env
-REPORTS_DISK=local   # dev
-# prod:
-REPORTS_DISK=s3
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_DEFAULT_REGION=
-AWS_BUCKET=vin-reports-prod
-```
+**Сделать:**
 
-### Скачивание
+- `reports.file_disk`, `reports.file_path`
 
-```php
-if ($report->file_disk === 's3') {
-    return redirect(Storage::disk('s3')->temporaryUrl($report->file_path, now()->addMinutes(15)));
-}
-return Storage::disk('local')->download($report->file_path);
-```
+---
 
-### Бэкап (документировать в README)
+## Шаг 2 — Диск `reports` в config
 
-- БД — ежедневный dump
-- S3 — versioning бакета; lifecycle для старых PDF по политике retention (152-ФЗ)
+- [ ] local + s3 из `.env`
 
-**Критерий:** переключение `REPORTS_DISK` меняет поведение без правок бизнес-логики.
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Filesystem | [Filesystem](https://laravel.com/docs/filesystem) |
+| S3 driver | [Amazon S3 Compatible](https://laravel.com/docs/filesystem#amazon-s3-compatible-filesystems) |
+
+**Сделать:**
+
+- `config/filesystems.php` — диск `reports`
+
+---
+
+## Шаг 3 — Job пишет через Storage
+
+- [ ] `Storage::disk(config('filesystems.reports'))`
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| File storage | [File Storage](https://laravel.com/docs/filesystem#file-uploads) |
+
+**Сделать:**
+
+- Обновить `GenerateReportsJob` / `PdfBuilder`
+
+---
+
+## Шаг 4 — ReportDownloadController
+
+- [ ] Policy + `temporaryUrl` (s3) / `download()` (local)
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Temporary URLs | [Temporary URLs](https://laravel.com/docs/filesystem#temporary-urls) |
+| Authorization | [Authorization](https://laravel.com/docs/authorization) |
+
+---
+
+## Шаг 5 — `.env.example` и документация
+
+- [ ] `REPORTS_DISK=local`; prod — s3, ключи AWS/YC
+
+**Сделать:**
+
+- README: переключение диска без смены бизнес-логики
+
+---
+
+## Шаг 6 — Тест `Storage::fake('s3')`
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Storage fake | [Storage Fake](https://laravel.com/docs/filesystem#testing) |
+
+**Критерий:** `REPORTS_DISK` меняет поведение. Бэкап: БД + PDF (см. [GLOSSARY](../GLOSSARY.md)).
+
+---
+
+## Собес
+
+- [ ] Зачем S3 при нескольких воркерах — устно
+
+## TIME_LOG
+
+- [ ] Записать часы
 
 ## Следующий урок
 
@@ -56,4 +106,4 @@ return Storage::disk('local')->download($report->file_path);
 
 ## Справочник
 
-> [DOMAIN.md](../DOMAIN.md) — хранение PDF. [05 Docker](05-docker-compose.md) — volume vs S3.
+> [DOMAIN.md](../DOMAIN.md) · [05 Docker](05-docker-compose.md)

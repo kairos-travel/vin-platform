@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('service_offer_integration_steps', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreignId('service_offer_id')->constrained('service_offers');
             $table->string('provider');

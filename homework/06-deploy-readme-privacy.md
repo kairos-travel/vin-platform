@@ -1,61 +1,124 @@
 # Урок 06 — Деплой, README EN, политика ПДн
 
-**Цель:** проект готов к портфолио и коммерческому staging: README на английском, политика обработки ПДн (152-ФЗ), дисклеймеры, pitch VIN-платформы.
+**Цель:** портфолио + staging: README EN, `/privacy`, согласие при регистрации, UI удаления аккаунта.
 
-## Задание (сдать наставнику)
+**Перед стартом:** уроки **00**, **05** · [DOMAIN.md](../DOMAIN.md) — решения #5, #16 · корневой [06-deploy-portfolio-readme.md](../../../homework/06-deploy-portfolio-readme.md)
 
-- [ ] **Шаг 1:** `README.md` (EN) — what it does, stack, setup, **Disclaimer** (no real VIN/PII in demo).
-- [ ] **Шаг 2:** страница `/privacy` (RU) — политика ПДн: оператор, цели, основания (согласие + договор), сроки, права субъекта, контакт.
-- [ ] **Шаг 3:** при регистрации — чекбокс согласия со ссылкой на `/privacy`.
-- [ ] **Шаг 4:** UI удаления профиля → `anonymize()` (урок 01).
-- [ ] **Шаг 5:** staging на VPS с [урока 00](../homework/00-local-environment.md) актуален: проверь `APP_URL`, HTTPS, `php artisan config:cache` после изменений.
-- [ ] **Шаг 6:** pitch 30 сек EN: *vehicle data reports marketplace, Laravel, Paykeeper, queued API pipeline*.
-- [ ] **Собес:** GDPR/152-ФЗ basics — устно.
-- [ ] `TIME_LOG` + финальный EN commit.
+---
 
-## Перед ДЗ
+## Шаг 1 — README.md (EN)
 
-- [DOMAIN.md](../DOMAIN.md) — решения #5, #16
-- Корневой [06](../../../homework/06-deploy-portfolio-readme.md) — структура README
-- **VPS + деплой + HTTPS:** [урок 00](../homework/00-local-environment.md) — nginx, домен, Let's Encrypt уже должны быть
+- [ ] What it does, stack, setup, Disclaimer (no real VIN/PII in demo)
 
-## Техника
+**Прочитать:**
 
-### Политика ПДн (минимальные блоки)
+| Тема | Документация |
+|------|----------------|
+| Структура README | [06-deploy-portfolio-readme.md](../../../homework/06-deploy-portfolio-readme.md) |
 
-1. Кто оператор (ИП/ООО — placeholder)
-2. Какие данные: ФИО, email, телефон, VIN/ГРЗ (как идентификаторы ТС)
-3. Цели: регистрация, исполнение договора (отчёт), поддержка
-4. Основания: ст. 6 152-ФЗ — согласие + исполнение договора
-5. Передача: провайдеры API (Tronk и др.) — перечислить классы
-6. Срок хранения и удаление по запросу
-7. Права: доступ, исправление, удаление — email поддержки
+**Сделать:**
 
-### README EN (скелет)
+- Stack: Blade, Tailwind, Filament, Paykeeper, queues, PDF pipeline
+- Setup local + staging; disclaimer
 
-```markdown
-## Vin Report Platform (portfolio / commercial MVP)
+---
 
-Blade + Tailwind storefront, Filament admin, Paykeeper payments,
-queued multi-provider report pipeline (PDF).
+## Шаг 2 — Страница `/privacy` (RU)
 
-**Disclaimer:** Do not submit real personal data or production VINs in demo environments.
-```
+- [ ] Политика ПДн по 152-ФЗ
 
-### Анонимизация
+**Прочитать:**
 
-Подтверждение в UI → `ProfilePolicy::delete` → `anonymize()` → logout.
+| Тема | Документация |
+|------|----------------|
+| Blade view | [Views](https://laravel.com/docs/views) |
+| Решения проекта | [DOMAIN.md](../DOMAIN.md) |
+
+**Сделать:**
+
+- Оператор, цели, основания (согласие + договор), сроки, права субъекта, контакт
+- Передача провайдерам API (Tronk и др.)
+
+---
+
+## Шаг 3 — Согласие при регистрации
+
+- [ ] Чекбокс + ссылка на `/privacy`
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Validation | [Validation](https://laravel.com/docs/validation) |
+| Breeze registration | [Laravel Breeze (11.x)](https://laravel.com/docs/11.x/starter-kits#laravel-breeze) |
+
+**Сделать:**
+
+- Обязательный checkbox `accepted` на форме register
+
+---
+
+## Шаг 4 — UI удаления профиля
+
+- [ ] Кнопка → `ProfilePolicy::delete` → `anonymize()` → logout
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Policies | [Authorization](https://laravel.com/docs/authorization) |
+| Soft delete | [Soft Deleting](https://laravel.com/docs/eloquent#soft-deleting) |
+
+**Сделать:**
+
+- Подтверждение в UI; вызов `anonymize()` из урока 01
+- Logout после удаления
+
+---
+
+## Шаг 5 — Staging актуален
+
+- [ ] `APP_URL`, HTTPS, `config:cache` на VPS
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Deployment | [Deployment](https://laravel.com/docs/deployment) |
+| Урок 00 | [00-local-environment.md](00-local-environment.md) |
+
+**Сделать:**
+
+- Проверить `/var/www/vin-platform`, certbot, `php artisan test` на сервере
+
+---
+
+## Шаг 6 — Pitch EN 30 сек
+
+- [ ] Устно: marketplace, Laravel, Paykeeper, queued pipeline
+
+**Сделать:**
+
+- Текст на английском; финальный EN commit
 
 **Критерий:** наставник читает `/privacy` и README без вопросов «а где согласие?».
 
+---
+
+## Собес
+
+- [ ] GDPR/152-ФЗ basics — устно
+
+## TIME_LOG
+
+- [ ] Записать часы
+
 ## Следующий урок
 
-[07 — корзина и checkout](07-cart-checkout.md) (фаза 2 — полный ТЗ).
-
-После **06** уже можно показывать staging; фаза 2 закрывает корзину, гараж, поддержку, прод-интеграции. Собесы **07–14** в корневом `homework/` — параллельно.
+[07 — корзина и checkout](07-cart-checkout.md)
 
 ---
 
 ## Справочник
 
-> [MENTORSHIP.md](../../../MENTORSHIP.md). [100 вопросов](../../../interview/100-questions-middle.md) — compliance на собесе.
+> [MENTORSHIP.md](../../../MENTORSHIP.md) · [100 вопросов](../../../interview/100-questions-middle.md)

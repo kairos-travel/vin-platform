@@ -1,50 +1,102 @@
 # Урок 04 — Feature-тесты
 
-**Цель:** автоматические тесты критичного коммерческого пути: заказ, идемпотентный webhook, генерация отчёта (fake pipeline).
+**Цель:** автотесты критичного пути: заказ, идемпотентный webhook, генерация отчёта (fake pipeline).
 
-## Задание (сдать наставнику)
+**Перед стартом:** урок **03** сдан
 
-- [ ] **Шаг 1:** тест «авторизованный пользователь создаёт заказ» → `pending_payment`, `OrderItem` с snapshot цены.
-- [ ] **Шаг 2:** тест webhook Paykeeper — первый вызов → `paid`, Job dispatched; **второй** с тем же `paykeeper_id` → Job **не** второй раз (`Queue::fake()`).
-- [ ] **Шаг 3:** тест `GenerateReportsJob` с отключёнными интеграциями → `Report` `completed`, файл существует.
-- [ ] **Шаг 4:** тест Policy — чужой заказ/отчёт 403.
-- [ ] **Шаг 5:** тест оффера с `document_types: ["vin","fines"]` → **2** `reports` на один `OrderItem`.
-- [ ] **Собес:** §36 (PHPUnit), §19 (транзакции) — устно.
-- [ ] `TIME_LOG`.
+---
 
-## Перед ДЗ
+## Шаг 1 — Тест создания заказа
 
-- [Testing](https://laravel.com/docs/testing), [HTTP Tests](https://laravel.com/docs/http-tests)
-- Урок **03** сдан
+- [ ] Авторизованный пользователь → `pending_payment`, `price_snapshot`
 
-## Техника
+**Прочитать:**
 
-### Пример: идемпотентность
+| Тема | Документация |
+|------|----------------|
+| Testing | [Testing](https://laravel.com/docs/testing) |
+| HTTP Tests | [HTTP Tests](https://laravel.com/docs/http-tests) |
+| Authentication in tests | [Acting As User](https://laravel.com/docs/http-tests#acting-as-an-authenticated-user) |
 
-```php
-Queue::fake();
+**Сделать:**
 
-$this->postJson('/webhooks/paykeeper', $payload)->assertOk();
-$this->postJson('/webhooks/paykeeper', $payload)->assertOk();
+- Feature-тест: POST формы заказа → `Order` + `OrderItem` с корректным snapshot
 
-Queue::assertPushed(GenerateReportsJob::class, 1);
-```
+---
 
-### Пример: несколько отчётов
+## Шаг 2 — Тест идемпотентности webhook
 
-```php
-$offer = ServiceOffer::factory()->create([
-    'document_types' => ['vin', 'fines'],
-]);
-// ... оплата ...
-$this->assertCount(2, $orderItem->fresh()->reports);
-```
+- [ ] Два POST с одним `paykeeper_id` → Job dispatched **один** раз
 
-**Критерий:** `php artisan test` зелёный в CI-стиле (без внешних API).
+**Прочитать:**
 
-## После фазы 1
+| Тема | Документация |
+|------|----------------|
+| Queue fakes | [Faking Queue](https://laravel.com/docs/queues#testing) |
 
-В [уроке 07](07-cart-checkout.md) добавить тест корзины; в [10](10-integrations-live.md) — тесты pipeline с `Http::fake()`.
+**Сделать:**
+
+- `Queue::fake()`; два `postJson('/webhooks/paykeeper', $payload)` → `assertPushed(..., 1)`
+
+---
+
+## Шаг 3 — Тест GenerateReportsJob
+
+- [ ] Stub pipeline → `Report` `completed`, файл существует
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Storage fake | [Storage Fake](https://laravel.com/docs/filesystem#testing) |
+
+**Сделать:**
+
+- Job с отключёнными интеграциями → файл на fake disk
+
+---
+
+## Шаг 4 — Тест Policy
+
+- [ ] Чужой заказ/отчёт → 403
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Authorization tests | [Authorization](https://laravel.com/docs/authorization#authorizing-actions-using-policies) |
+
+**Сделать:**
+
+- Два пользователя; запрос чужого ресурса → 403
+
+---
+
+## Шаг 5 — Тест нескольких Report
+
+- [ ] `document_types: ["vin","fines"]` → 2 `reports` на один `OrderItem`
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Factories | [Eloquent Factories](https://laravel.com/docs/eloquent-factories) |
+
+**Сделать:**
+
+- `ServiceOffer::factory()` с двумя типами → после оплаты `assertCount(2, $reports)`
+
+**Критерий:** `php artisan test` зелёный без внешних API.
+
+---
+
+## Собес
+
+- [ ] §36 (PHPUnit), §19 (транзакции) — устно
+
+## TIME_LOG
+
+- [ ] Записать часы
 
 ## Следующий урок
 
@@ -54,4 +106,4 @@ $this->assertCount(2, $orderItem->fresh()->reports);
 
 ## Справочник
 
-> Корневой [04-feature-tests](../../../homework/04-feature-tests.md) — структура чеклиста. [09 SQL](../../../homework/09-interview-sql.md).
+> Корневой [04-feature-tests](../../../homework/04-feature-tests.md) · Тест корзины — в [07](07-cart-checkout.md)

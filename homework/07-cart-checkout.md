@@ -1,65 +1,119 @@
 # Урок 07 — Корзина и checkout
 
-**Цель:** полный коммерческий сценарий из ТЗ: несколько офферов в **корзине** → один **заказ** → одна **оплата** → отчёты по каждой позиции.
+**Цель:** несколько офферов в **корзине** → один **заказ** → одна **оплата** → отчёты по каждой позиции.
 
-**Предусловие:** урок **03** («Купить сейчас», одна позиция) сдан — логику Paykeeper и Job переиспользуем.
+**Перед стартом:** урок **03** сдан (Paykeeper + Job переиспользуем) · [DOMAIN.md](../DOMAIN.md) — корзина, Offer
 
-## Задание (сдать наставнику)
+---
 
-- [ ] **Шаг 1:** миграции `carts`, `cart_items` (`profile_id`, `service_offer_id`, `input_type`, `input_value`).
-- [ ] **Шаг 2:** «В корзину» с страницы оффера; страница `/cart` — список, удаление, итог.
-- [ ] **Шаг 3:** checkout: `Cart` → `Order` + N `OrderItem` (snapshot цены) + `total_amount`; корзина очищается.
-- [ ] **Шаг 4:** один `Payment` на весь заказ; webhook из урока 03 запускает Job **на каждый** `OrderItem`.
-- [ ] **Шаг 5:** нельзя добавить оффер неактивной услуги; услуга без офферов — не добавляется.
-- [ ] **Шаг 6:** тест: 2 позиции в корзине → 1 оплата → 2 набора `Report`.
-- [ ] **Собес:** §19 (транзакция checkout), §47 (идемпотентность) — устно.
-- [ ] `TIME_LOG`.
+## Шаг 1 — Cart и CartItem
 
-## Перед ДЗ
+- [ ] Модели и связи *(миграции уже в уроке 01)*
 
-- [DOMAIN.md](../DOMAIN.md) — корзина и правило Offer
-- Уроки **03–04** сданы
+**Прочитать:**
 
-## Техника
+| Тема | Документация |
+|------|----------------|
+| Eloquent | [Eloquent Relationships](https://laravel.com/docs/eloquent-relationships) |
+| Unique constraint | [Schema Builder](https://laravel.com/docs/migrations#indexes) |
 
-### Шаг 1 — Cart (1:1 с Profile)
+**Сделать:**
 
-```php
-// carts: profile_id UNIQUE
-// Cart: belongsTo Profile; hasMany CartItem
-// CartItem: belongsTo ServiceOffer; валидация input (vin/grz/sts)
-```
+- `Cart` 1:1 `Profile` (`profile_id` unique)
+- `CartItem`: `service_offer_id`, `input_type`, `input_value`
+- `Cart::firstOrCreate(['profile_id' => $profile->id])`
 
-`Cart::firstOrCreate(['profile_id' => $profile->id])` — **одна** корзина на профиль.
+---
 
-### Шаг 2 — Checkout в транзакции
+## Шаг 2 — «В корзину» и `/cart`
 
-```php
-DB::transaction(function () use ($cart) {
-    $order = Order::create([...]);
-    foreach ($cart->items as $item) {
-        $order->items()->create([
-            'service_offer_id' => $item->service_offer_id,
-            'input_type' => $item->input_type,
-            'input_value' => $item->input_value,
-            'price_snapshot' => $item->offer->price,
-        ]);
-    }
-    $cart->items()->delete();
-});
-```
+- [ ] Добавление, список, удаление, итог
 
-### Шаг 3 — Paykeeper
+**Прочитать:**
 
-Сумма платежа = `$order->total_amount` (пересчёт при создании order из items).
+| Тема | Документация |
+|------|----------------|
+| Controllers | [Controllers](https://laravel.com/docs/controllers) |
+| Validation | [Form Requests](https://laravel.com/docs/validation#form-request-validation) |
 
-**Критерий:** заказ с 2 VIN-пакетами (разные VIN) → 2×N отчётов после оплаты.
+**Сделать:**
 
-## UX (п.7 — зафиксировано)
+- Кнопка с страницы оффера; страница `/cart`
+- Валидация `input_type` (vin/grz/sts)
 
-- Основной путь: **«В корзину»** → `/cart` → checkout.
-- **«Купить сейчас»** (если есть на UI): тот же код — `addToCart()` + redirect на `/cart` или checkout; **не** отдельный обход корзины.
-- Убрать из прод-кода прямое создание `Order` из урока 03 (оставить только Cart → Order).
+---
+
+## Шаг 3 — Checkout в транзакции
+
+- [ ] `Cart` → `Order` + N `OrderItem` + `total_amount`; корзина очищается
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| DB transactions | [Database Transactions](https://laravel.com/docs/database#database-transactions) |
+
+**Сделать:**
+
+- `DB::transaction`: создать order/items с `price_snapshot`, удалить `cart_items`
+- Убрать прямой `Order` из урока 03 (только Cart → Order)
+
+---
+
+## Шаг 4 — Один Payment на заказ
+
+- [ ] Webhook урока 03; Job на **каждый** `OrderItem`
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Queues | [Queues](https://laravel.com/docs/queues) |
+
+**Сделать:**
+
+- Сумма Paykeeper = `$order->total_amount`
+- После `paid` — dispatch Job per item
+
+---
+
+## Шаг 5 — Валидация каталога
+
+- [ ] Нельзя добавить неактивный оффер / услугу без офферов
+
+**Сделать:**
+
+- Проверки перед `CartItem::create`
+
+---
+
+## Шаг 6 — Тест корзины
+
+- [ ] 2 позиции → 1 оплата → 2 набора `Report`
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Testing | [HTTP Tests](https://laravel.com/docs/http-tests) |
+
+**Сделать:**
+
+- Feature-тест полного checkout
+
+**Критерий:** 2 VIN-пакета (разные VIN) → 2×N отчётов.
+
+**UX (п.7):** «Купить сейчас» = add to cart + redirect `/cart`, не обход корзины.
+
+---
+
+## Собес
+
+- [ ] §19 (транзакция checkout), §47 (идемпотентность) — устно
+
+## TIME_LOG
+
+- [ ] Записать часы
 
 ## Следующий урок
 
@@ -69,4 +123,4 @@ DB::transaction(function () use ($cart) {
 
 ## Справочник
 
-> [04 — тесты](04-feature-tests.md) — расширить тест корзины. [09 SQL](../../../homework/09-interview-sql.md).
+> [04 — тесты](04-feature-tests.md)

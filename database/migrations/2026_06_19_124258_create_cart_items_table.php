@@ -14,9 +14,13 @@ return new class extends Migration
         Schema::create('cart_items', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreignId('cart_id')->constrained('carts');
             $table->foreignId('service_offer_id')->constrained('service_offers');
+
+            // Что ввёл клиент для этой позиции в корзине — до оформления заказа.
+            // Например, VIN, ГРЗ, СТС.
             $table->string('input_type');
             $table->string('input_value');
         });

@@ -1,43 +1,105 @@
 # Урок 10 — Живые интеграции API
 
-**Цель:** заменить stub-провайдеры на реальные клиенты; ветвления **VIN / GRZ / STS** по [цепочке API](https://docs.google.com/spreadsheets/d/1XMaa4ime6GRpaHGWuVBZxS6OzGMP6Itk8Oz_puXxkXc/edit?gid=0#gid=0); **частичный PDF**.
+**Цель:** реальные клиенты вместо stub; ветки **VIN / GRZ / STS**; fallback; частичный PDF.
 
-## Задание (сдать наставнику)
+**Перед стартом:** урок **03** · [DOMAIN.md](../DOMAIN.md) — паттерны Integrations · [цепочка API](https://docs.google.com/spreadsheets/d/1XMaa4ime6GRpaHGWuVBZxS6OzGMP6Itk8Oz_puXxkXc/edit?gid=0#gid=0) · ключи в `.env` (не в git)
 
-- [ ] **Шаг 1:** `TronkClient`, `ApiCloudClient`, `SpectrumDataClient` — HTTP + таймауты + логирование.
-- [ ] **Шаг 2:** `integration_logs` — `order_item_id`, `provider`, `request_meta`, `response_status`, `duration_ms`.
-- [ ] **Шаг 3:** `ReportPipeline` — ветки по `input_type`; fallback штрафов API CLOUD → Tronk.
-- [ ] **Шаг 4:** частичный отчёт: секция недоступна → в PDF «данные не получены», `reports.meta.partial = true`.
-- [ ] **Шаг 5:** feature flags — включить Tronk на staging; остальные по готовности.
-- [ ] **Шаг 6:** вторая услуга (не VIN) — отдельный pipeline key в `config/integrations.php`.
-- [ ] **Собес:** §47 (retry vs fallback), §38 (очередь при долгих API) — устно.
-- [ ] `TIME_LOG`.
+---
 
-## Перед ДЗ
+## Шаг 1 — HTTP-клиенты провайдеров
 
-- [DOMAIN.md](../DOMAIN.md) — паттерны Integrations
-- Урок **03**, тестовые ключи в `.env` (не коммитить)
+- [ ] `TronkClient`, `ApiCloudClient`, `SpectrumDataClient` — таймауты, логи
 
-## Техника
+**Прочитать:**
 
-### Конфиг (источник правды)
+| Тема | Документация |
+|------|----------------|
+| HTTP Client | [HTTP Client](https://laravel.com/docs/http-client) |
+| Timeouts | [HTTP Client — Timeout](https://laravel.com/docs/http-client#timeout) |
 
-```php
-// config/integrations.php — синхронизировать с Google Sheets
-'pipelines' => [
-    'vin' => ['steps' => [...]],
-    'fines' => ['steps' => [...]],
-],
-```
+**Сделать:**
 
-**DaData:** не в [цепочке Sheets](https://docs.google.com/spreadsheets/d/1XMaa4ime6GRpaHGWuVBZxS6OzGMP6Itk8Oz_puXxkXc/edit?gid=0#gid=0) — в MVP **не подключаем**. Если позже появится в ТЗ — optional step.
+- `app/Integrations/*/...Client.php`; не HTTP в контроллере
 
-### Ошибки
+---
 
-- 4xx от провайдера → лог + partial/failed по политике услуги
-- 5xx / timeout → `retry` Job (max 3), потом failed
+## Шаг 2 — `integration_logs`
 
-**Критерий:** на staging с `TRONK_ENABLED=true` реальный запрос → PDF с данными или partial.
+- [ ] `order_item_id`, `provider`, `request_meta`, `response_status`, `duration_ms`
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Logging | [Logging](https://laravel.com/docs/logging) |
+
+**Сделать:**
+
+- Миграция + запись после каждого шага pipeline
+
+---
+
+## Шаг 3 — ReportPipeline: ветки и fallback
+
+- [ ] По `input_type`; штрафы API CLOUD → Tronk
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Config | [Configuration](https://laravel.com/docs/configuration) |
+| DOMAIN pipeline | [DOMAIN.md](../DOMAIN.md) |
+
+**Сделать:**
+
+- Синхрон с Google Sheets в `config/integrations.php`
+- DaData — **не в MVP** (нет в Sheets)
+
+---
+
+## Шаг 4 — Частичный PDF
+
+- [ ] Секция «данные не получены»; `meta.partial = true`
+
+**Сделать:**
+
+- 4xx → partial по политике; не падать всем заказом
+
+---
+
+## Шаг 5 — Feature flags на staging
+
+- [ ] `TRONK_ENABLED=true` на staging; остальные по готовности
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| `.env` | [Environment](https://laravel.com/docs/configuration#environment-configuration) |
+
+---
+
+## Шаг 6 — Вторая услуга (не VIN)
+
+- [ ] Отдельный pipeline key в конфиге
+
+**Сделать:**
+
+- Например `fines` — отдельные steps
+
+**Критерий:** staging + Tronk → PDF с данными или partial.
+
+**Ошибки:** 5xx/timeout → retry Job (max 3), потом `failed`.
+
+---
+
+## Собес
+
+- [ ] §47 (retry vs fallback), §38 (очередь при долгих API) — устно
+
+## TIME_LOG
+
+- [ ] Записать часы
 
 ## Следующий урок
 
@@ -47,4 +109,4 @@
 
 ## Справочник
 
-> [08 SOLID](../../../homework/08-interview-solid.md). [03 — stub](03-orders-paykeeper-queue-integrations.md).
+> [03 — stub](03-orders-paykeeper-queue-integrations.md) · [08 SOLID](../../../homework/08-interview-solid.md)

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreignId('profile_id')->constrained('profiles')->unique();
         });

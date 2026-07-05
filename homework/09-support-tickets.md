@@ -1,36 +1,97 @@
 # Урок 09 — Служба поддержки
 
-**Цель:** раздел ЛК **«Служба поддержки»** — тикеты по заказам/отчётам, статусы, переписка.
+**Цель:** ЛК **«Служба поддержки»** — тикеты, статусы, переписка; ответы в Filament.
 
-## Задание (сдать наставнику)
+**Перед стартом:** уроки **02** (Filament), **03** (заказы)
 
-- [ ] **Шаг 1:** `support_tickets` — `profile_id`, `subject`, `status` (`open`/`answered`/`closed`), `order_id` nullable, `timestamps`.
-- [ ] **Шаг 2:** `support_messages` — `ticket_id`, `user_id` nullable (null = ответ поддержки из Filament), `body`, `timestamps`.
-- [ ] **Шаг 3:** ЛК: создать тикет, список, просмотр переписки, ответ клиента.
-- [ ] **Шаг 4:** Filament (роль **admin**): просмотр тикетов, ответ, смена статуса. Отдельная роль support — не в MVP.
-- [ ] **Шаг 5:** с формы заказа/отчёта — «Проблема с заказом» с предзаполненным `order_id`.
-- [ ] **Собес:** §37 (auth), §9 (отделение SupportService от контроллера) — устно.
-- [ ] `TIME_LOG`.
+---
 
-## Перед ДЗ
+## Шаг 1 — `support_tickets`
 
-- Уроки **02** (Filament), **03** (заказы)
+- [ ] `profile_id`, `subject`, `status`, `order_id` nullable
 
-## Техника
+**Прочитать:**
 
-### Статусы
+| Тема | Документация |
+|------|----------------|
+| Migrations | [Migrations](https://laravel.com/docs/migrations) |
 
-| Статус | Смысл |
-|--------|--------|
-| `open` | Клиент создал, ждёт ответа |
-| `answered` | Есть ответ поддержки |
-| `closed` | Завершён |
+**Сделать:**
 
-### Policy
+- Статусы: `open`, `answered`, `closed`
 
-`SupportTicketPolicy` — view/create только владелец `profile`.
+---
 
-**Критерий:** клиент создаёт тикет → оператор отвечает в Filament → клиент видит ответ в ЛК.
+## Шаг 2 — `support_messages`
+
+- [ ] `ticket_id`, `user_id` nullable, `body`
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Relationships | [Eloquent Relationships](https://laravel.com/docs/eloquent-relationships) |
+
+**Сделать:**
+
+- `user_id` null = ответ оператора из Filament
+
+---
+
+## Шаг 3 — ЛК клиента
+
+- [ ] Создать тикет, список, переписка, ответ клиента
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Controllers | [Controllers](https://laravel.com/docs/controllers) |
+
+**Сделать:**
+
+- CRUD тикетов в ЛК; только свои
+
+---
+
+## Шаг 4 — Filament (admin)
+
+- [ ] Просмотр, ответ, смена статуса
+
+**Прочитать:**
+
+| Тема | Документация |
+|------|----------------|
+| Filament Resources | [Filament Resources](https://filamentphp.com/docs/panels/resources/getting-started) |
+| Relation managers | [Relation Managers](https://filamentphp.com/docs/panels/resources/relation-managers) |
+
+**Сделать:**
+
+- Resource `SupportTicket`; роль `admin` only (не отдельная support в MVP)
+
+---
+
+## Шаг 5 — Создание с заказа/отчёта
+
+- [ ] «Проблема с заказом» с предзаполненным `order_id`
+
+**Сделать:**
+
+- Ссылка/кнопка из ЛК заказов и отчётов
+
+**Критерий:** клиент создаёт тикет → оператор отвечает в Filament → клиент видит ответ.
+
+**Policy:** `SupportTicketPolicy` — view/create только владелец `profile`.
+
+---
+
+## Собес
+
+- [ ] §37 (auth), §9 (SupportService vs контроллер) — устно
+
+## TIME_LOG
+
+- [ ] Записать часы
 
 ## Следующий урок
 
@@ -40,4 +101,4 @@
 
 ## Справочник
 
-> [12 Filament](../../../homework/12-interview-bitrix.md) — сравнение с тикетами в Bitrix.
+> [12 Bitrix](../../../homework/12-interview-bitrix.md)

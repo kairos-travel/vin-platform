@@ -1,9 +1,33 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+@layer components {
+    .site-header {
+        @apply bg-white border-b border-brand-header-border;
+    }
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    .site-header__inner {
+        @apply max-w-[1200px] mx-auto px-6 h-[56px] flex items-center justify-between relative;
+    }
+
+    .site-header__nav {
+        @apply hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2;
+    }
+
+    .site-header__nav-link {
+        @apply text-sm text-brand-menu hover:text-gray-900 transition-colors whitespace-nowrap;
+    }
+
+    .site-header__nav-link--active {
+        @apply text-gray-900 font-medium;
+    }
+
+    .site-header__nav-link--muted {
+        @apply text-brand-menu-muted pointer-events-none;
+    }
+
+    .site-header__auth-pill {
+        @apply inline-flex items-center px-6 py-2 bg-brand-red hover:bg-brand-red-hover text-white text-sm font-normal rounded-full transition-colors whitespace-nowrap;
+    }
 }
