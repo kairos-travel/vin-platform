@@ -4,23 +4,50 @@
 
 @layer components {
     .site-header {
-        @apply bg-white border-b border-brand-header-border;
+        @apply bg-white w-full border-b border-gray-100;
+    }
+
+    /* Стандартный контейнер: max 1280px + боковые отступы */
+    .site-container {
+        @apply w-full max-w-7xl mx-auto px-6 sm:px-8;
     }
 
     .site-header__inner {
-        @apply max-w-[1200px] mx-auto px-6 h-[56px] flex items-center justify-between relative;
+        @apply w-full max-w-7xl mx-auto h-[82px];
+        @apply flex items-center justify-between gap-3;
+        @apply xl:grid xl:grid-cols-[auto_1fr_auto] xl:items-center xl:gap-4;
+        padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+        padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+    }
+
+    @screen sm {
+        .site-header__inner {
+            padding-left: max(1.5rem, env(safe-area-inset-left, 0px));
+            padding-right: max(1.5rem, env(safe-area-inset-right, 0px));
+        }
+    }
+
+    @screen md {
+        .site-header__inner {
+            padding-left: max(2rem, env(safe-area-inset-left, 0px));
+            padding-right: max(2rem, env(safe-area-inset-right, 0px));
+        }
+    }
+
+    .site-header__actions {
+        @apply flex items-center gap-1 sm:gap-2 shrink-0;
     }
 
     .site-header__nav {
-        @apply hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2;
+        @apply hidden xl:flex items-center justify-center gap-10;
     }
 
     .site-header__nav-link {
-        @apply text-sm text-brand-menu hover:text-gray-900 transition-colors whitespace-nowrap;
+        @apply text-base font-medium leading-6 text-brand-menu hover:text-gray-900 transition-colors whitespace-nowrap;
     }
 
     .site-header__nav-link--active {
-        @apply text-gray-900 font-medium;
+        @apply text-gray-900;
     }
 
     .site-header__nav-link--muted {
@@ -28,6 +55,518 @@
     }
 
     .site-header__auth-pill {
-        @apply inline-flex items-center px-6 py-2 bg-brand-red hover:bg-brand-red-hover text-white text-sm font-normal rounded-full transition-colors whitespace-nowrap;
+        @apply inline-flex items-center justify-center px-5 py-2 bg-brand-red hover:bg-brand-red-hover text-white text-base font-medium leading-6 rounded-[32px] shadow-header-cta transition-colors whitespace-nowrap cursor-pointer;
+    }
+
+    /* Figma Tablet / Phone — красная pill в шапке рядом с бургером */
+    .site-header__auth-pill--compact {
+        @apply inline-flex items-center justify-center max-w-[9.5rem] sm:max-w-none px-2.5 sm:px-4 py-1.5 sm:py-2 bg-brand-red hover:bg-brand-red-hover text-white text-xs sm:text-base font-medium leading-6 rounded-[32px] transition-colors whitespace-nowrap cursor-pointer;
+        @apply max-sm:shadow-none sm:shadow-header-cta;
+    }
+
+    .site-header__auth-user {
+        @apply text-sm font-medium text-brand-menu hover:text-gray-900 truncate max-w-[180px];
+    }
+
+    .site-header__auth-logout {
+        @apply text-sm font-medium text-brand-red hover:text-brand-red-hover whitespace-nowrap transition-colors;
+    }
+
+    /* Figma node 253:645 / 253:443 — mobile & tablet dropdown */
+    .site-header__mobile-panel {
+        @apply px-5 md:px-8 pb-5 md:pb-8 flex flex-col gap-6;
+    }
+
+    .site-header__mobile-nav {
+        @apply flex flex-col w-full;
+    }
+
+    .site-header__mobile-nav-link {
+        @apply block w-full py-6 text-2xl font-semibold leading-9 text-black;
+    }
+
+    .site-header__mobile-nav > * + * {
+        @apply border-t border-brand-divider;
+    }
+
+    .site-header__mobile-nav > *:last-child {
+        @apply border-b border-brand-divider;
+    }
+
+    .site-header__auth-pill--mobile {
+        @apply inline-flex items-center justify-center w-full p-4 bg-black hover:bg-gray-900 text-white text-base font-medium leading-none rounded-[59px] transition-colors cursor-pointer;
+    }
+
+    .site-header__auth-user--mobile {
+        @apply block w-full py-6 text-2xl font-semibold leading-9 text-black text-left truncate;
+    }
+
+    .site-header__auth-logout--mobile {
+        @apply block w-full py-6 text-2xl font-semibold leading-9 text-brand-red text-left transition-colors;
+    }
+
+    /* ── Home page (Figma 253:856 / 253:443 / 253:658) ── */
+
+    .home-hero {
+        @apply relative overflow-hidden bg-white pt-12 pb-10 md:pt-16 md:pb-14 lg:pt-20 lg:pb-16;
+    }
+
+    .home-hero__title {
+        @apply text-[32px] sm:text-[40px] lg:text-[56px] font-semibold leading-tight text-black text-center max-w-4xl mx-auto;
+    }
+
+    .home-hero__subtitle {
+        @apply mt-6 text-base sm:text-lg leading-7 text-brand-menu text-center max-w-2xl mx-auto;
+    }
+
+    .home-hero__decor {
+        @apply pointer-events-none absolute opacity-[0.07] text-brand-menu;
+    }
+
+    .home-services {
+        @apply bg-white pb-14 md:pb-16 lg:pb-20;
+    }
+
+    .home-services__grid {
+        @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 max-w-5xl mx-auto;
+    }
+
+    .home-service-card {
+        @apply relative flex flex-col justify-between min-h-[160px] md:min-h-[180px] p-5 md:p-6 bg-brand-red rounded-2xl text-white shadow-card transition-transform hover:-translate-y-0.5;
+    }
+
+    .home-service-card--soon {
+        @apply bg-brand-red/80 cursor-default hover:translate-y-0;
+    }
+
+    .home-service-card__title {
+        @apply text-lg md:text-xl font-semibold leading-snug pr-4;
+    }
+
+    .home-service-card__link {
+        @apply inline-flex items-center gap-1 mt-4 text-sm font-medium text-white/90 hover:text-white transition-colors;
+    }
+
+    .home-service-card__soon {
+        @apply inline-block mt-4 text-sm font-medium text-white/70;
+    }
+
+    .home-partners {
+        @apply py-10 md:py-14 bg-white;
+    }
+
+    .home-partners__pill {
+        @apply flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-10
+            bg-brand-dark rounded-[999px] px-6 py-5 sm:px-8 sm:py-6 md:px-10 md:py-7;
+    }
+
+    .home-partners__intro {
+        @apply text-sm sm:text-base text-white font-medium leading-snug shrink-0;
+    }
+
+    .home-partners__logos {
+        @apply flex flex-wrap items-center justify-center lg:justify-end gap-x-6 gap-y-3 sm:gap-x-8 md:gap-x-10;
+    }
+
+    .home-partners__logo {
+        @apply text-sm sm:text-base font-semibold text-white tracking-wide whitespace-nowrap;
+    }
+
+    .home-features {
+        @apply bg-brand-pink py-14 md:py-20 lg:py-24;
+    }
+
+    .home-features__badge {
+        @apply inline-block px-4 py-1.5 text-sm font-medium text-brand-menu
+            border border-brand-divider rounded-full bg-white;
+    }
+
+    .home-features__title {
+        @apply mt-5 text-[32px] sm:text-[40px] lg:text-[48px] font-semibold leading-[1.1] text-black;
+    }
+
+    .home-features__subtitle {
+        @apply mt-4 text-base sm:text-lg text-brand-menu leading-7 max-w-lg;
+    }
+
+    .home-features__list {
+        @apply mt-8 grid sm:grid-cols-2 gap-x-8 gap-y-3.5;
+    }
+
+    .home-features__item {
+        @apply flex items-center gap-3 text-sm sm:text-base text-black leading-6;
+    }
+
+    .home-features__check {
+        @apply shrink-0 w-5 h-5 rounded-full bg-brand-dark text-white flex items-center justify-center;
+    }
+
+    .home-features__actions {
+        @apply mt-10 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6;
+    }
+
+    .home-features__btn {
+        @apply inline-flex items-center justify-center gap-2 px-8 py-3.5
+            bg-brand-red hover:bg-brand-red-hover text-white text-base font-medium
+            rounded-[999px] transition-colors whitespace-nowrap;
+    }
+
+    .home-features__trial {
+        @apply text-sm sm:text-base text-brand-menu leading-snug max-w-[12rem];
+    }
+
+    .home-features__phone-wrap {
+        @apply relative flex justify-center lg:justify-end py-8 lg:py-0;
+    }
+
+    .home-features__phone-rings {
+        @apply absolute inset-0 flex items-center justify-center pointer-events-none;
+    }
+
+    .home-features__phone-rings span {
+        @apply absolute rounded-full border border-brand-divider/80;
+    }
+
+    .home-features__phone-rings span:nth-child(1) {
+        width: 280px;
+        height: 280px;
+    }
+
+    .home-features__phone-rings span:nth-child(2) {
+        width: 340px;
+        height: 340px;
+    }
+
+    .home-features__phone-rings span:nth-child(3) {
+        width: 400px;
+        height: 400px;
+    }
+
+    .home-features__phone {
+        @apply relative z-10 w-[220px] sm:w-[250px] lg:w-[270px]
+            bg-gray-900 rounded-[36px] p-2 shadow-card;
+        transform: rotate(-8deg);
+    }
+
+    .home-features__phone-notch {
+        @apply w-16 h-1.5 bg-gray-700 rounded-full mx-auto mt-2 mb-3;
+    }
+
+    .home-features__phone-screen {
+        @apply bg-brand-surface rounded-[28px] px-4 pb-5 pt-4 min-h-[360px];
+    }
+
+    .home-features__phone-label {
+        @apply text-xs text-brand-menu mb-4;
+    }
+
+    .home-features__phone-card {
+        @apply bg-white rounded-2xl p-5 shadow-sm text-center;
+    }
+
+    .home-features__phone-icon {
+        @apply flex justify-center mb-3;
+    }
+
+    .home-features__phone-card-title {
+        @apply text-lg font-semibold text-black;
+    }
+
+    .home-features__phone-card-text {
+        @apply mt-2 text-xs text-brand-menu leading-5;
+    }
+
+    .home-features__phone-download {
+        @apply mt-4 inline-flex items-center justify-center w-full py-2.5
+            bg-brand-red text-white text-[10px] font-bold tracking-wide rounded-lg uppercase;
+    }
+
+    .home-tariffs {
+        @apply relative overflow-hidden py-14 md:py-20 lg:py-24 bg-brand-pink;
+    }
+
+    .home-tariffs__decor {
+        @apply absolute inset-0 pointer-events-none;
+    }
+
+    .home-tariffs__red-band {
+        @apply absolute left-0 right-0 top-[42%] h-28 sm:h-32 md:h-36 bg-brand-red;
+    }
+
+    .home-tariffs__dots {
+        @apply absolute inset-0 opacity-40;
+        background-image: radial-gradient(circle, #E50D25 1px, transparent 1px);
+        background-size: 18px 18px;
+        mask-image: linear-gradient(to left, black 30%, transparent 70%);
+        -webkit-mask-image: linear-gradient(to left, black 30%, transparent 70%);
+    }
+
+    .home-tariffs__inner {
+        @apply relative z-10;
+    }
+
+    .home-tariffs__title {
+        @apply text-[32px] sm:text-[40px] lg:text-[48px] font-semibold leading-tight text-black text-center;
+    }
+
+    .home-tariffs__grid {
+        @apply mt-10 md:mt-12 grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 items-end max-w-5xl mx-auto;
+    }
+
+    .home-tariff-card {
+        @apply relative flex flex-col bg-[#F8F8F8] rounded-2xl p-6 md:p-7
+            border-2 border-brand-red text-left;
+    }
+
+    .home-tariff-card--featured {
+        @apply md:pb-10 md:-translate-y-4 shadow-card;
+    }
+
+    .home-tariff-card__name {
+        @apply text-xl sm:text-2xl font-bold text-black uppercase tracking-tight;
+    }
+
+    .home-tariff-card__subtitle {
+        @apply mt-2 text-sm text-brand-menu leading-5;
+    }
+
+    .home-tariff-card__price {
+        @apply mt-5 text-[40px] md:text-[48px] font-semibold leading-none text-black;
+    }
+
+    .home-tariff-card__currency {
+        @apply text-xl md:text-2xl font-medium align-top mr-0.5;
+    }
+
+    .home-tariff-card__btn {
+        @apply mt-5 inline-flex items-center justify-center w-full py-3
+            bg-brand-red hover:bg-brand-red-hover text-white text-base font-medium
+            rounded-[999px] transition-colors border-0 cursor-pointer;
+    }
+
+    .home-tariff-card__features {
+        @apply mt-6 flex-1 space-y-2.5;
+    }
+
+    .home-tariff-card__feature {
+        @apply flex items-start gap-2.5 text-sm text-brand-menu leading-5;
+    }
+
+    .home-tariff-card__check {
+        @apply w-4 h-4 mt-0.5 shrink-0 text-brand-dark;
+    }
+
+    .home-tariffs__cta {
+        @apply mt-12 md:mt-16 max-w-3xl mx-auto;
+    }
+
+    .home-cta__pill {
+        @apply flex items-center justify-center w-full px-8 py-5
+            bg-brand-dark rounded-[999px] text-white text-base md:text-lg font-medium
+            text-center cursor-pointer transition-colors hover:bg-black border-0;
+    }
+
+    .home-faq {
+        @apply bg-white py-14 md:py-20 lg:py-24;
+    }
+
+    .home-faq__title {
+        @apply text-[28px] sm:text-[36px] lg:text-[44px] font-semibold leading-tight text-black;
+    }
+
+    .home-faq__item {
+        @apply border-b border-brand-divider;
+    }
+
+    .home-faq__question {
+        @apply flex w-full items-center justify-between gap-4 py-5 md:py-6 text-left text-base md:text-lg font-semibold text-black;
+    }
+
+    .home-faq__answer {
+        @apply pb-5 md:pb-6 text-base leading-7 text-brand-menu;
+    }
+
+    .site-footer {
+        @apply bg-brand-dark text-white;
+    }
+
+    .site-footer__inner {
+        @apply site-container py-10 md:py-12;
+    }
+
+    .site-footer__grid {
+        @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8;
+    }
+
+    .site-footer__heading {
+        @apply text-sm font-semibold uppercase tracking-wide text-white/50 mb-4;
+    }
+
+    .site-footer__link {
+        @apply block text-sm text-white/80 hover:text-white transition-colors py-1;
+    }
+
+    .site-footer__bottom {
+        @apply mt-10 pt-6 border-t border-white/10 text-sm text-white/50 text-center sm:text-left;
+    }
+
+    /* ── Auth modals (Figma 269:516 / 269:536 / 271:556 / 283:525 / 284:543 / 284:559) ── */
+
+    .auth-modal__overlay {
+        @apply fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/50;
+    }
+
+    .auth-modal__dialog {
+        @apply relative w-full max-w-[440px] bg-white rounded-[32px] px-6 py-8 sm:px-8 sm:py-10 shadow-card;
+    }
+
+    .auth-modal__close {
+        @apply absolute top-5 right-5 p-1 text-brand-menu hover:text-gray-900 transition-colors;
+    }
+
+    .auth-modal__title {
+        @apply text-2xl sm:text-[28px] font-semibold leading-tight text-black pr-8;
+    }
+
+    .auth-modal__subtitle {
+        @apply mt-3 text-sm leading-6 text-brand-menu;
+    }
+
+    .auth-modal__tabs {
+        @apply mt-6 flex p-1 bg-brand-dark rounded-full;
+    }
+
+    .auth-modal__tab {
+        @apply flex-1 py-2.5 text-sm font-medium text-white rounded-full transition-colors text-center;
+    }
+
+    .auth-modal__tab--active {
+        @apply bg-white text-black shadow-sm;
+    }
+
+    .auth-modal__form {
+        @apply mt-6 space-y-4;
+    }
+
+    .auth-modal__label {
+        @apply block text-sm font-medium text-black mb-1.5;
+    }
+
+    .auth-modal__input {
+        @apply w-full px-4 py-3 bg-brand-input-bg rounded-xl text-base text-black placeholder:text-brand-menu/60 border-0 focus:ring-2 focus:ring-brand-green/30 focus:outline-none;
+    }
+
+    .auth-modal__error {
+        @apply mt-1.5 text-sm text-brand-red;
+    }
+
+    .auth-modal__input-wrap {
+        @apply flex items-center gap-2 px-4 py-3 bg-brand-input-bg rounded-xl focus-within:ring-2 focus-within:ring-brand-green/30;
+    }
+
+    .auth-modal__prefix {
+        @apply text-base text-black shrink-0;
+    }
+
+    .auth-modal__input-wrap .auth-modal__input {
+        @apply p-0 bg-transparent focus:ring-0;
+    }
+
+    .auth-modal__link {
+        @apply inline-block text-sm font-medium text-brand-green hover:text-brand-green/80 transition-colors;
+    }
+
+    .auth-modal__submit {
+        @apply w-full py-3.5 mt-2 bg-brand-dark hover:bg-black text-white text-base font-medium rounded-xl transition-colors;
+    }
+
+    .auth-modal__back {
+        @apply w-full py-3.5 mt-4 border border-brand-divider text-black text-base font-medium rounded-xl hover:bg-brand-surface transition-colors;
+    }
+
+    .auth-modal__success-icon {
+        @apply w-14 h-14 mx-auto mb-4 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center;
+    }
+
+    /* ── Admin preview shell (до установки Filament) ── */
+
+    .admin-shell {
+        @apply min-h-screen flex bg-brand-surface;
+    }
+
+    .admin-sidebar {
+        @apply hidden lg:flex flex-col w-64 shrink-0 bg-brand-dark text-white min-h-screen;
+    }
+
+    .admin-sidebar__brand {
+        @apply flex items-center gap-2.5 px-6 h-[82px] border-b border-white/10;
+    }
+
+    .admin-sidebar__nav {
+        @apply flex-1 py-4 px-3 space-y-1;
+    }
+
+    .admin-sidebar__link {
+        @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors;
+    }
+
+    .admin-sidebar__link--active {
+        @apply bg-brand-red text-white hover:bg-brand-red;
+    }
+
+    .admin-sidebar__section {
+        @apply px-3 pt-4 pb-2 text-xs font-semibold uppercase tracking-wide text-white/40;
+    }
+
+    .admin-main {
+        @apply flex-1 flex flex-col min-w-0;
+    }
+
+    .admin-topbar {
+        @apply h-[82px] bg-white border-b border-brand-divider flex items-center justify-between px-6 sm:px-8;
+    }
+
+    .admin-content {
+        @apply flex-1 p-6 sm:p-8;
+    }
+
+    .admin-page-title {
+        @apply text-2xl font-semibold text-black;
+    }
+
+    .admin-card {
+        @apply bg-white rounded-2xl border border-brand-divider shadow-tariff overflow-hidden;
+    }
+
+    .admin-table {
+        @apply w-full text-sm text-left;
+    }
+
+    .admin-table th {
+        @apply px-4 py-3 bg-brand-surface font-medium text-brand-menu border-b border-brand-divider;
+    }
+
+    .admin-table td {
+        @apply px-4 py-3 border-b border-brand-divider text-black;
+    }
+
+    .admin-badge {
+        @apply inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium;
+    }
+
+    .admin-badge--green {
+        @apply bg-brand-green/10 text-brand-green;
+    }
+
+    .admin-badge--gray {
+        @apply bg-gray-100 text-brand-menu;
+    }
+
+    .admin-btn {
+        @apply inline-flex items-center justify-center px-4 py-2 bg-brand-red hover:bg-brand-red-hover text-white text-sm font-medium rounded-lg transition-colors;
+    }
+
+    .admin-btn--secondary {
+        @apply bg-white border border-brand-divider text-black hover:bg-brand-surface;
     }
 }

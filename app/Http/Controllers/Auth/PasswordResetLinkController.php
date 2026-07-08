@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Throwable;
 
 class PasswordResetLinkController extends Controller
 {
@@ -25,25 +27,52 @@ class PasswordResetLinkController extends Controller
      *
      * @throws ValidationException
      */
-    public function store(ForgotPasswordRequest $request): RedirectResponse
+    public function store(ForgotPasswordRequest $request): RedirectResponse|JsonResponse
     {
         $email = $request->email;
 
-        if (isset($email)) {
-            // We will send the password reset link to this user. Once we have attempted
-            // to send the link, we will examine the response then see the message we
-            // need to show to the user. Finally, we'll send out a proper response.
+        if (! isset($email)) {
+            $message = 'Пока восстановление пароля по телефону невозможно';
+
+            if ($request->wantsJson()) {
+                throw ValidationException::withMessages(['login' => $message]);
+            }
+
+            return back()->withErrors(['login' => $message]);
+        }
+
+        try {
             $status = Password::sendResetLink(
                 $request->only('email')
             );
+        } catch (TransportExceptionInterface|Throwable $exception) {
+            report($exception);
 
-            return $status == Password::RESET_LINK_SENT
-                ? back()->with('status', __($status))
-                : back()->withInput($request->only('login'))
-                    ->withErrors(['login' => __($status)]);
-        } else {
-            // пока выводить сообщение что пока восстановления пароля по телефону невозможно
-            return back()->withErrors(['login' => 'Пока восстановление пароля по телефону невозможно']);
+            $message = 'Не удалось отправить письмо. Попробуйте позже.';
+
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $message], 503);
+            }
+
+            return back()->withInput($request->only('login'))
+                ->withErrors(['login' => $message]);
         }
+
+        if ($status !== Password::RESET_LINK_SENT) {
+            if ($request->wantsJson()) {
+                throw ValidationException::withMessages(['login' => __($status)]);
+            }
+
+            return back()->withInput($request->only('login'))
+                ->withErrors(['login' => __($status)]);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => __($status),
+            ]);
+        }
+
+        return back()->with('status', __($status));
     }
 }

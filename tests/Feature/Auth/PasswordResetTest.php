@@ -3,8 +3,9 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
@@ -19,29 +20,45 @@ class PasswordResetTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_reset_password_link_can_be_requested(): void
+    public function test_reset_password_link_can_be_requested_with_login_field(): void
     {
         Notification::fake();
 
         $user = User::factory()->create();
 
-        $this->post('/forgot-password', ['email' => $user->email]);
+        $response = $this->postJson('/forgot-password', [
+            'login' => $user->email,
+        ]);
 
-        Notification::assertSentTo($user, ResetPassword::class);
+        $response->assertOk();
+
+        Notification::assertSentTo($user, ResetPasswordNotification::class);
     }
 
-    public function test_reset_password_screen_can_be_rendered(): void
+    public function test_reset_password_link_rejects_phone_login(): void
+    {
+        $response = $this->postJson('/forgot-password', [
+            'login' => '+79991234567',
+        ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['login']);
+    }
+
+    public function test_reset_password_screen_opens_modal_on_main_page(): void
     {
         Notification::fake();
 
         $user = User::factory()->create();
 
-        $this->post('/forgot-password', ['email' => $user->email]);
+        $this->post('/forgot-password', ['login' => $user->email]);
 
-        Notification::assertSentTo($user, ResetPassword::class, function ($notification) {
-            $response = $this->get('/reset-password/'.$notification->token);
+        Notification::assertSentTo($user, ResetPasswordNotification::class, function ($notification) use ($user) {
+            $response = $this->get('/reset-password/'.$notification->token.'?email='.urlencode($user->email));
 
-            $response->assertStatus(200);
+            $response->assertOk();
+            $response->assertSee('Новый пароль', false);
+            $response->assertSee('authModal', false);
 
             return true;
         });
@@ -53,14 +70,14 @@ class PasswordResetTest extends TestCase
 
         $user = User::factory()->create();
 
-        $this->post('/forgot-password', ['email' => $user->email]);
+        $this->post('/forgot-password', ['login' => $user->email]);
 
-        Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
+        Notification::assertSentTo($user, ResetPasswordNotification::class, function ($notification) use ($user) {
             $response = $this->post('/reset-password', [
                 'token' => $notification->token,
-                'email' => $user->email,
-                'password' => 'password',
-                'password_confirmation' => 'password',
+                'login' => $user->email,
+                'password' => 'new-secure-password',
+                'password_confirmation' => 'new-secure-password',
             ]);
 
             $response
@@ -69,5 +86,32 @@ class PasswordResetTest extends TestCase
 
             return true;
         });
+
+        $this->assertTrue(Hash::check('new-secure-password', $user->refresh()->password));
+    }
+
+    public function test_password_can_be_reset_via_json(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+
+        $this->post('/forgot-password', ['login' => $user->email]);
+
+        Notification::assertSentTo($user, ResetPasswordNotification::class, function ($notification) use ($user) {
+            $response = $this->postJson('/reset-password', [
+                'token' => $notification->token,
+                'login' => $user->email,
+                'password' => 'new-secure-password',
+                'password_confirmation' => 'new-secure-password',
+            ]);
+
+            $response->assertOk()
+                ->assertJsonStructure(['message']);
+
+            return true;
+        });
+
+        $this->assertTrue(Hash::check('new-secure-password', $user->refresh()->password));
     }
 }

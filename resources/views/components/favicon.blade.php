@@ -1,0 +1,4 @@
+{{-- Figma: иконка логотипа БазаБаза (#E50D25) — public/favicon.svg --}}
+<link rel="icon" href="{{ asset('favicon.ico') }}" sizes="32x32">
+<link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">

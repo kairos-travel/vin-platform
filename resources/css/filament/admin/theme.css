@@ -1,0 +1,28 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@config '../../../../tailwind.config.js';
+
+/**
+ * Filament admin theme — brand БазаБаза
+ * Подключение: AdminPanelProvider → ->viteTheme('resources/css/filament/admin/theme.css')
+ * Требует: composer require filament/filament
+ */
+
+@layer components {
+    .fi-sidebar {
+        @apply bg-brand-dark;
+    }
+
+    .fi-topbar {
+        @apply bg-white border-b border-brand-divider;
+    }
+
+    .fi-logo {
+        @apply font-brand font-extrabold;
+    }
+}
+
+/* Primary = brand red (дублирует ->colors() в провайдере) */
+:root {
+    --filament-brand-primary-500: 229 13 37; /* #E50D25 */
+}

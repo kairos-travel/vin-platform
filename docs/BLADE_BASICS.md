@@ -2,6 +2,8 @@
 
 Частые вопросы по шаблонам. Примеры — из Breeze и `layouts/app.blade.php` проекта.
 
+**Alpine.js (бургер, modal, FAQ):** [ALPINEJS.md](./ALPINEJS.md)
+
 ---
 
 ## Как связаны `<x-app-layout>` и `layouts/app.blade.php`
