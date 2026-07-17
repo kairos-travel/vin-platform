@@ -64,7 +64,7 @@ Laravel **Breeze (Blade)** ставит Alpine из коробки — мы ис
 | **Blade** | HTML на сервере, без JS | все `.blade.php` |
 | **Alpine** | лёгкий JS в шаблоне | шапка, modal, FAQ |
 | **Livewire** | компоненты с PHP-состоянием на сервере | Filament внутри |
-| **Filament** | админка `/admin` | урок 02, шаг 5 |
+| **Filament** | админка `/admin` | урок 02, шаг 4 |
 
 **Auth popup на витрине** — Alpine (не уходим на `/login`).
 

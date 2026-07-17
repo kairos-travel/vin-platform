@@ -10,7 +10,8 @@ cd projects/vin-platform
 
 Стек: Laravel 13.8, Breeze 2.4. Локаль уже `APP_LOCALE=ru`, почта ловится в Mailpit (`http://localhost:8026`).
 
-**Staging / production (деплой + SMTP на сервере):** [PRODUCTION_MAIL.md](./PRODUCTION_MAIL.md)
+**Staging / production (деплой + SMTP на сервере):** [PRODUCTION_MAIL.md](./PRODUCTION_MAIL.md)  
+**REG.RU: ящик и `MAIL_*`:** [REG_RU_MAIL_SETUP.md](./REG_RU_MAIL_SETUP.md)
 
 ---
 

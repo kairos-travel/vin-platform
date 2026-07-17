@@ -6,8 +6,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ MainController::class, 'index' ])->name('main');
 
-Route::view('/admin-preview', 'admin.preview')->name('admin.preview');
-
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

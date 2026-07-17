@@ -71,10 +71,10 @@
 |---|--------|---|
 | 🔄 | Laravel Breeze, Profile при регистрации *(+ вход по телефону/email — сверх сметы)* | 6 |
 | ⬜ | Главная: одна услуга VIN по Figma (desktop) | 8 |
+| ⬜ | Filament: CRUD Service, ServiceOffer *(цепочки API — урок 10/12)* | 4 |
 | ⬜ | Страница VIN: офферы, цены, «В корзину» (заглушка → урок 07) | 6 |
-| ⬜ | **Адаптив** 9 страниц MVP (mobile + tablet) | 10 |
-| ⬜ | Filament: CRUD Service, ServiceOffer, цепочки API | 4 |
 | ⬜ | Сидер: VIN + 2–3 оффера | 1 |
+| ⬜ | **Адаптив** 9 страниц MVP (mobile + tablet) | 10 |
 
 **Урок:** [02-breeze-catalog-filament.md](../homework/02-breeze-catalog-filament.md)
 

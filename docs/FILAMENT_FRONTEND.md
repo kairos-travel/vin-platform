@@ -1,6 +1,6 @@
 # Filament — фронтенд и брендинг
 
-Подготовлено **до** `composer require filament/filament`. Бекенд (Resources, Policies) — урок 02, шаг 5.
+Подготовлено **до** `composer require filament/filament`. Бекенд (Resources, Policies) — урок 02, **шаг 4**.
 
 ## Что уже есть в репозитории
 
@@ -99,4 +99,4 @@ Filament генерирует UI из PHP-классов Resources. Отдель
 
 ## Доступ
 
-Только пользователи с `canAccessPanel()` (роль `admin`) — настраивается в модели `User`, см. [Filament — authorization](https://filamentphp.com/docs/panels/users#authorizing-access-to-the-panel).
+Только пользователи с `canAccessPanel()` (флаг `is_admin` в пакете A; таблица ролей не обязательна) — настраивается в модели `User`, см. [Filament — Users](https://filamentphp.com/docs/3.x/panels/users#authorizing-access-to-the-panel).

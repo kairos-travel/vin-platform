@@ -9,6 +9,7 @@
 
 - [00-local-environment.md](../homework/00-local-environment.md) — первичная настройка VPS, nginx, HTTPS
 - [PASSWORD_RESET_EMAIL.md](./PASSWORD_RESET_EMAIL.md) — текст и вид письма сброса пароля
+- [REG_RU_MAIL_SETUP.md](./REG_RU_MAIL_SETUP.md) — **подробно:** ящик в ispmanager, откуда брать каждый `MAIL_*`
 - [Laravel Deployment](https://laravel.com/docs/deployment)
 
 ---
@@ -248,7 +249,7 @@ CACHE_STORE=database
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.reg.ru
 MAIL_PORT=587
-MAIL_SCHEME=tls
+MAIL_SCHEME=smtp
 MAIL_USERNAME=noreply@iz-agent.ru
 MAIL_PASSWORD=...
 MAIL_FROM_ADDRESS=noreply@iz-agent.ru
@@ -302,13 +303,16 @@ config/mail.php → SMTP
 | 3 | DNS: **SPF**, **DKIM** | не попадать в спам |
 | 4 | Пользователь в БД с реальным **email** | иначе некуда слать |
 
-### 4.3. Создать ящик
+### 4.3. Создать ящик и заполнить `MAIL_*`
 
-**A. REG.RU** — Почта → ящик → SMTP из справки (часто `smtp.reg.ru`).
+**REG.RU (хостинг + ispmanager):** пошагово — в отдельном файле **[REG_RU_MAIL_SETUP.md](./REG_RU_MAIL_SETUP.md)** (создание `noreply@iz-agent.ru`, откуда каждое поле в `.env`).
 
-**B. Yandex 360** — `smtp.yandex.ru`, порт 465 (`smtps`) или 587 (`tls`), пароль приложения.
+Кратко: ispmanager → **Почта → Почтовые ящики → Создать** → параметры SMTP из «Настройки почтовых программ».
 
-**C. Mailgun / Postmark / SendGrid / SES** — SMTP или API из кабинета.
+**Другие провайдеры:**
+
+- **Yandex 360** — `smtp.yandex.ru`, порт 465 (`smtps`) или 587 (`tls`), пароль приложения.
+- **Mailgun / Postmark / SendGrid / SES** — SMTP или API из кабинета.
 
 ### 4.4. DNS
 
@@ -325,17 +329,17 @@ dig +short TXT _dmarc.iz-agent.ru
 
 ### 4.5. Примеры `MAIL_*` в `.env`
 
-**REG.RU / типичный хостинг:**
+**REG.RU:** полный разбор полей — [REG_RU_MAIL_SETUP.md](./REG_RU_MAIL_SETUP.md). Минимальный блок:
 
 ```env
 MAIL_MAILER=smtp
-MAIL_HOST=smtp.reg.ru
+MAIL_HOST=mail.hosting.reg.ru
 MAIL_PORT=587
-MAIL_SCHEME=tls
+MAIL_SCHEME=smtp
 MAIL_USERNAME=noreply@iz-agent.ru
-MAIL_PASSWORD=ваш_пароль
+MAIL_PASSWORD=пароль_из_ispmanager
 MAIL_FROM_ADDRESS=noreply@iz-agent.ru
-MAIL_FROM_NAME="БазаБаза"
+MAIL_FROM_NAME="${APP_NAME}"
 ```
 
 **Yandex (порт 465):**
